@@ -51,40 +51,63 @@ for i in range(mastercols.shape[0]):
 		exprcoldic[mastercols[i,0]] = mastercols[i,2]
 		chrmdic[mastercols[i,0]] = mastercols[i,4]
 
-pvals = []
-genes = []
-snps = []
-winnerdic = {}
-pcdic = {}
+####Build a dictionary to reference the genomic coordinates of each SNP
+print "Loading SNP annotations..."
+snpdic = {}
+snpbed = open('/mnt/lustre/home/cusanovich/500HT/hutt.3chip.hg19.bed','r')
+for line in snpbed:
+	liner = line.strip().split()
+	snpdic[liner[3]] = liner[0:3]
+
 #completedgenes = 0
 #chr22ers = []
 #for gene in masterdic.keys():
 #	if chrmdic[gene] == chrm:
 #		chr22ers.append(gene)
 
+
+pvals = []
+genes = []
+snps = []
+winnerdic = {}
 #t0 = time.time()
 
 for gene in masterdic.keys():
-#for gene in chr22ers[0:1]:
-#for gene in masterdic.keys()[1:500]:
 	if chrmdic[gene] != chrm:
 		continue
 #	if completedgenes == 20:
 #		continue
 	print gene
-	#print "Extracting SNPs..."
-	extracter = "plink --noweb --bfile " + genodir + "hutt.3chip --from " + masterdic[gene][0] + " --to " + masterdic[gene][-1] + " --make-bed --out " + currfiles
-	ifier(extracter)
-	#if findivs[0] not in open(currfiles + '.fam','r').readline():
-	#	print "Warning! Genotype findivs do not match phenotype findivs!"
-	#	sys.exit()
-	#print "Prepping GEMMA inputs..."
-	famer = ('cut -f1-5 -d" " ' + currfiles + '.fam > ' + currfiles + '.header.fam; cut -f' + str(int(exprcoldic[gene]) + 6) + ' -d" " ' + genodir +
-		'hutt.3chip.fam.update > ' + currfiles + '.tailer.fam; paste -d" " ' + currfiles + '.header.fam ' + currfiles + '.tailer.fam > ' +
+	currbimbam = open(currfiles + '.bimbam','r')
+	####Pull genotypes for the SNPs in cis, if genotypes not already in dictionary: go to geno file and pull in appropriate data
+	for i, snp in enumerate(masterdic[gene]):
+		try:
+			if genodic[snp] == 'NA':
+				continue
+			print >> currbimbam, ", ".join(genodic[snp])
+		except KeyError:
+			#tabixer = pysam.Tabixfile('/mnt/lustre/home/cusanovich/500HT/Imputed1415/ByChr/hutt.imputed.' + chrm + '.txt.gz')
+			tabixer = pysam.Tabixfile('/mnt/lustre/home/cusanovich/500HT/3chip/ByChr/hutt.3chip.' + chrm + '.txt.gz')
+			for record in tabixer.fetch(chrm,int(snpdic[snp][1]),int(snpdic[snp][2])):
+				genos = record.split('\t')
+			tabixer.close()
+			y = [genos[4], 'A', 'G'] + genos[5:len(genos)]
+			missing = len([k for k, j in enumerate(y) if j == 'NA'])
+			maf = 1 - (float(len([k for k, j in enumerate(y) if j == '2'])*2 + len([k for k, j in enumerate(y) if j == '1']))/float(len(y)*2 - missing))
+			#print maf
+			if missing > 21:
+				genodic[snp] = 'NA'
+				continue
+			if maf < 0.05:
+				genodic[snp] = 'NA'
+				continue
+			genodic[snp] = y
+			print >> currbimbam, ", ".join(genodic[snp])
+	phener = ('cut -f' + str(int(exprcoldic[gene]) + 1) + ' -d" " ' + hmdir +
+		'500HT/qqnorm.500ht.3chip_order.bimbam > ' + currfiles + '.pheno; paste -d" " ' + currfiles + '.header.fam ' + currfiles + '.tailer.fam > ' +
 		currfiles + '.fam; rm ' + currfiles + '.header.fam; rm ' + currfiles + '.tailer.fam')
-	ifier(famer)
 	#print "Running GEMMA..."
-	gemmer = ('cd ' + genodir + '; ' + hmdir + 'Programs/gemma0.94 -bfile curr_' + chrm + '_pc' + str(pcs) + ' -km 2 -k ' + hmdir + '500HT/addSNP.500ht.txt -c ' + hmdir + '500HT/Exprs/qqnorm.500ht.3chip_order.pc' + str(pcs) + ' -lmm 2 -o curr_' + chrm + '_pc' + str(pcs))
+	gemmer = ('cd ' + genodir + '; ' + hmdir + 'Programs/gemma0.94 -g ' + currfiles + '.bimbam -p ' + currfiles + '.pheno -k ' + hmdir + '500HT/addSNP.500ht.3chip_order.square.txt -c ' + hmdir + '500HT/Exprs/qqnorm.500ht.3chip_order.pc' + str(pcs) + ' -lmm 2 -n ' + str(int(exprcoldic[gene]) + 1) + ' -o curr_' + chrm + '_pc' + str(pcs))
 	ifier(gemmer)
 	currresults = open(genodir + '/output/curr_' + chrm + '_pc' + str(pcs) + '.assoc.txt','r')
 	pmin = 1.1

@@ -20,6 +20,8 @@ pcs = sys.argv[2]
 genodir = '/mnt/lustre/home/cusanovich/500HT/3chip/'
 hmdir = '/mnt/lustre/home/cusanovich/'
 currfiles = genodir + "curr_" + chrm + "_pc" + str(pcs)
+mapper = '3chip'
+distance = '150kb'
 
 def ifier(commander):
 	ify = subprocess.Popen(commander,shell=True)
@@ -38,8 +40,7 @@ def matrix_reader(matrix_file,sep="\t",dtype='|S20'):
 	return raws
 
 print "Loading expression..."
-time.sleep(random.randint(1,150))
-mastercols = matrix_reader('/mnt/lustre/home/cusanovich/500HT/hutt.3chip.mastercols.txt',dtype='|S15')
+mastercols = matrix_reader('/mnt/lustre/home/cusanovich/500HT/hutt.' + mapper + '.' + distance + '.mastercols.txt',dtype='|S15')
 masterdic = {}
 exprcoldic = {}
 chrmdic = {}
@@ -58,6 +59,10 @@ snpbed = open('/mnt/lustre/home/cusanovich/500HT/hutt.3chip.hg19.bed','r')
 for line in snpbed:
 	liner = line.strip().split()
 	snpdic[liner[3]] = liner[0:3]
+
+cover = ('cp ' + hmdir + '500HT/addSNP.500ht.' + mapper + '_order.square.txt ' + currfiles + '.square.txt; cp ' + hmdir + '500HT/Exprs/qqnorm.500ht.' + mapper + '_order.pc' + str(pcs)) + ' ' + currfiles + '.pcs.txt'
+ifier(cover)
+
 
 #completedgenes = 0
 #chr22ers = []
@@ -87,7 +92,7 @@ for gene in masterdic.keys():
 			print >> currbimbam, ", ".join(genodic[snp])
 		except KeyError:
 			#tabixer = pysam.Tabixfile('/mnt/lustre/home/cusanovich/500HT/Imputed1415/ByChr/hutt.imputed.' + chrm + '.txt.gz')
-			tabixer = pysam.Tabixfile('/mnt/lustre/home/cusanovich/500HT/3chip/ByChr/hutt.3chip.' + chrm + '.txt.gz')
+			tabixer = pysam.Tabixfile('/mnt/lustre/home/cusanovich/500HT/' + mapper + '/ByChr/hutt.' + mapper + '.' + distance + '.' + chrm + '.txt.gz')
 			for record in tabixer.fetch(chrm,int(snpdic[snp][1]),int(snpdic[snp][2])):
 				genos = record.split('\t')
 			tabixer.close()
@@ -103,11 +108,11 @@ for gene in masterdic.keys():
 				continue
 			genodic[snp] = y
 			print >> currbimbam, ", ".join(genodic[snp])
-	phener = ('cut -f' + str(int(exprcoldic[gene]) + 1) + ' -d" " ' + hmdir +
-		'500HT/qqnorm.500ht.3chip_order.bimbam > ' + currfiles + '.pheno; paste -d" " ' + currfiles + '.header.fam ' + currfiles + '.tailer.fam > ' +
-		currfiles + '.fam; rm ' + currfiles + '.header.fam; rm ' + currfiles + '.tailer.fam')
+	currbimbam.close()
+	phener = ('cut -f' + str(int(exprcoldic[gene]) + 1) + ' -d" " ' + hmdir + '500HT/qqnorm.500ht.' + mapper + '_order.bimbam > ' + currfiles + '.pheno')
+	ifier(phener)
 	#print "Running GEMMA..."
-	gemmer = ('cd ' + genodir + '; ' + hmdir + 'Programs/gemma0.94 -g ' + currfiles + '.bimbam -p ' + currfiles + '.pheno -k ' + hmdir + '500HT/addSNP.500ht.3chip_order.square.txt -c ' + hmdir + '500HT/Exprs/qqnorm.500ht.3chip_order.pc' + str(pcs) + ' -lmm 2 -n ' + str(int(exprcoldic[gene]) + 1) + ' -o curr_' + chrm + '_pc' + str(pcs))
+	gemmer = ('cd ' + genodir + '; ' + hmdir + 'Programs/gemma0.94 -g ' + currfiles + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.pcs.txt -lmm 2 -o curr_' + chrm + '_pc' + str(pcs))
 	ifier(gemmer)
 	currresults = open(genodir + '/output/curr_' + chrm + '_pc' + str(pcs) + '.assoc.txt','r')
 	pmin = 1.1
@@ -127,53 +132,23 @@ for gene in masterdic.keys():
 	#print "Starting up permutations..."
 	winnerperms = 0
 	broken = 0
-	findic = {}
 	for perm in range(10000):
 		if broken == 1:
 			continue
-		if perm == 0:
-			try:
-				test = findic.keys()[0]
-			except IndexError:
-				finder = open(currfiles + '.fam','r')
-				findivs = []
-				randfindivs = []
-				for line in finder:
-					liner = line.strip().split()
-					findic[liner[1]] = liner
-					findivs.append(liner[1])
-					randfindivs.append(liner[1])
-				finder.close()
-			try:
-				test = pcdic.keys()[0]
-			except IndexError:
-				pcfile = open(hmdir + '500HT/Exprs/qqnorm.500ht.3chip_order.pc' + str(pcs),'r')
-				for z,line in enumerate(pcfile):
-					pcdic[findivs[z]] = line.strip().split()
-				pcfile.close()
-		random.shuffle(randfindivs)
-		rearrange = open(currfiles + '.findivs.rearrange.txt','w')
-		for z in range(len(findivs)):
-			print >> rearrange, 'HUTTERITES\t' + findivs[z] + '\tHUTTERITES\t' + randfindivs[z]
-		rearrange.close()
-		plinker = 'plink --noweb --bfile ' + currfiles + ' --update-ids ' + currfiles + '.findivs.rearrange.txt --make-bed --out ' + genodir + 'perm_curr_' + chrm + '_pc' + str(pcs)
-		ifier(plinker)
-		permfam = open(genodir + 'perm_curr_' + chrm + '_pc' + str(pcs) + '.fam','w')
-		permpc = open(genodir + 'perm_curr_' + chrm + '_pc' + str(pcs) + '.pcs','w')
-		for z in range(len(findivs)):
-			print >> permfam, " ".join(findic[randfindivs[z]])
-			print >> permpc, " ".join(pcdic[randfindivs[z]])
-		permfam.close()
-		permpc.close()
+		currperm = open(genodir + 'perm_curr_' + chrm + '_pc' + str(pcs) + '.bimbam','w')
+		randind = random.shuffle(range(431))
+		for snp in masterdic[gene]:
+			print >> currperm, ", ".join(genodic[snp][randind])
+		currperm.close()
 		print str(winnerperms)
-		gemmer = ('cd ' + genodir + '; ' + hmdir + 'Programs/gemma0.94 -bfile perm_curr_' + chrm + '_pc' + str(pcs) + ' -km 2 -k ' + hmdir + '500HT/addSNP.500ht.txt -c ' + genodir + 'perm_curr_' + chrm + '_pc' + str(pcs) + '.pcs' + ' -lmm 2 -o perm_curr_' + chrm + '_pc' + str(pcs))
+		gemmer = ('cd ' + genodir + '; ' + hmdir + 'Programs/gemma0.94 -g ' + genodir + 'perm_curr_' + chrm + '_pc' + str(pcs) + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.pcs.txt' + ' -lmm 2 -o perm_curr_' + chrm + '_pc' + str(pcs))
 		ifier(gemmer)
 		perms = []
 		permer = open(genodir + 'output/perm_curr_' + chrm + '_pc' + str(pcs) + '.assoc.txt','r')
 		permlow = 1
 		for line in permer:
 			liner = line.strip().split()
-			if liner[5] == 'nan' or 'p_lrt' in liner[5]:
+			if 'nan' in liner[5] or 'p_lrt' in liner[5]:
 				continue
 			if float(liner[5]) < permlow:
 				permlow = float(liner[5])

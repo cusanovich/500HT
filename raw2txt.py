@@ -39,7 +39,7 @@ print "Transposing genotypes..."
 sys.stdout.flush()
 genorfile = open(genor,'w')
 for line in range(6,raws.shape[1]):
-	print >> genorfile, "\t".join(list(raws[:,line]))
+	print >> genorfile, "\t".join(list(raws[1:raws.shape[0],line]))
 
 genorfile.close()
 

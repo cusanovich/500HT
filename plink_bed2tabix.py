@@ -18,32 +18,33 @@ def ifier(commander):
         ify = subprocess.Popen(commander,shell=True)
         ify.wait()
 
-genodir = '/mnt/lustre/home/cusanovich/500HT/Imputed1415/'
+genodir = '/mnt/lustre/home/cusanovich/500HT/3chip/'
 
-# print 'Creating raw files...'
-# for j in range(1,23):
-# 	plinker = 'echo "plink --noweb --nonfounders --maf 0.05 --geno 0.05 --bfile ' + genodir + 'imputed_cgi --chr ' + str(j) + ' --make-bed --out ' + genodir + 'ByChr/hutt.imputed.chr' + str(j) + '; plink --bfile ' + genodir + 'ByChr/hutt.imputed.chr' + str(j) + ' --recodeA --out ' + genodir + 'ByChr/hutt.imputed.chr' + str(j) + '; touch ' + genodir + 'ByChr/chr' + str(j) + '.done" | qsub -l h_vmem=2g -o ~/dump/ -e ~/dump/'
-# 	ifier(plinker)
+print 'Creating raw files...'
+for j in range(1,23):
+	#plinker = 'echo "plink --noweb --nonfounders --maf 0.05 --geno 0.05 --bfile ' + genodir + 'imputed_cgi --chr ' + str(j) + ' --make-bed --out ' + genodir + 'ByChr/hutt.imputed.chr' + str(j) + '; plink --bfile ' + genodir + 'ByChr/hutt.imputed.chr' + str(j) + ' --recodeA --out ' + genodir + 'ByChr/hutt.imputed.chr' + str(j) + '; touch ' + genodir + 'ByChr/chr' + str(j) + '.done" | qsub -l h_vmem=2g -o ~/dump/ -e ~/dump/'
+	plinker = 'echo "plink --noweb --nonfounders --bfile ' + genodir + 'hutt.3chip --chr ' + str(j) + ' --make-bed --out ' + genodir + 'ByChr/hutt.3chip.chr' + str(j) + '; plink --bfile ' + genodir + 'ByChr/hutt.3chip.chr' + str(j) + ' --recodeA --out ' + genodir + 'ByChr/hutt.3chip.chr' + str(j) + '; touch ' + genodir + 'ByChr/chr' + str(j) + '.done" | qsub -l h_vmem=2g -o ~/dump/ -e ~/dump/'
+	ifier(plinker)
 
-# while len(glob.glob(genodir + 'ByChr/*.done')) < 22:
-# 	time.sleep(5)
+while len(glob.glob(genodir + 'ByChr/*.done')) < 22:
+	time.sleep(5)
 
-# cleanup = "rm " + genodir + "ByChr/*.done"
-# ifier(cleanup)
+cleanup = "rm " + genodir + "ByChr/*.done"
+ifier(cleanup)
 
-# print 'Creating bed files...'
-# for j in range(1,23):
-# 	converter = 'echo "python /mnt/lustre/home/cusanovich/500HT/Scripts/raw2txt.py ' + str(j) + ' ' + genodir + '" | qsub -l h_vmem=8g -o ~/dump/ -e ~/dump/'
-# 	ifier(converter)
+print 'Creating bed files...'
+for j in range(1,23):
+	converter = 'echo "python /mnt/lustre/home/cusanovich/500HT/Scripts/raw2txt.py ' + str(j) + ' ' + genodir + '" | qsub -l h_vmem=8g -o ~/dump/ -e ~/dump/'
+	ifier(converter)
 
-# while len(glob.glob(genodir + 'ByChr/*.done')) < 22:
-# 	time.sleep(5)
+while len(glob.glob(genodir + 'ByChr/*.done')) < 22:
+	time.sleep(5)
 
-# ifier(cleanup)
+ifier(cleanup)
 
 print 'Creating tabix files...'
 for j in range(1,23):
-	tabixer = 'echo "bgzip ' + genodir + 'ByChr/hutt.imputed.chr' + str(j) + '.txt; tabix -p bed ' + genodir + 'ByChr/hutt.imputed.chr' + str(j) + '.txt.gz; touch ' + genodir + 'ByChr/' + str(j) + '.done" | qsub -l h_vmem=2g -o ~/dump/ -e ~/dump/ -wd `pwd`'
+	tabixer = 'echo "bgzip ' + genodir + 'ByChr/hutt.3chip.chr' + str(j) + '.txt; tabix -p bed ' + genodir + 'ByChr/hutt.3chip.chr' + str(j) + '.txt.gz; touch ' + genodir + 'ByChr/' + str(j) + '.done" | qsub -l h_vmem=2g -o ~/dump/ -e ~/dump/ -wd `pwd`'
 	ifier(tabixer)
 
 while len(glob.glob(genodir + 'ByChr/*.done')) < 22:
@@ -53,7 +54,7 @@ print 'Cleaning up a bit...'
 ifier(cleanup)
 for j in range(1,23):
 	for k in ['.bed','.bim','.fam','.log','.nof','.raw']:
-		cleaner = 'rm ' + genodir + 'ByChr/hutt.imputed.chr' + str(j) + k
+		cleaner = 'rm ' + genodir + 'ByChr/hutt.3chip.chr' + str(j) + k
 		ifier(cleaner)
 
 print 'Work complete.'

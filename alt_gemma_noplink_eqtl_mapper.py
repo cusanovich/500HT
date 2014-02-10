@@ -22,11 +22,15 @@ pcs = sys.argv[2]
 #chrm = 'chr22'
 #pcs = 20
 genodir = '/mnt/lustre/home/cusanovich/500HT/3chip/'
+os.chdir(genodir)
 hmdir = '/mnt/lustre/home/cusanovich/'
-currfiles = genodir + "curr_" + chrm + "_pc" + str(pcs)
 mapper = '3chip'
 distance = '150kb'
-os.chdir(genodir)
+if bonferroni:
+	correction = 'bonferroni'
+else:
+	correction = 'permutation'
+currfiles = genodir + "curr_" + chrm + "_pc" + str(pcs) + "_" + correction
 
 def ifier(commander):
 	ify = subprocess.Popen(commander,shell=True)
@@ -136,9 +140,9 @@ for gene in masterdic.keys():
 	print >> currbimbam, "\n".join(currgenos)
 	currbimbam.close()
 	#print "Running GEMMA..."
-	gemmer = (hmdir + 'Programs/gemma0.94 -g ' + currfiles + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.pcs.txt -lmm 2 -o curr_' + chrm + '_pc' + str(pcs))
+	gemmer = (hmdir + 'Programs/gemma0.94 -g ' + currfiles + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.pcs.txt -lmm 2 -o curr_' + chrm + '_pc' + str(pcs)) + '_' + correction
 	ifier(gemmer)
-	currresults = open(genodir + '/output/curr_' + chrm + '_pc' + str(pcs) + '.assoc.txt','r')
+	currresults = open(genodir + '/output/curr_' + chrm + '_pc' + str(pcs) + '_' + correction + '.assoc.txt','r')
 	pmin = 1.1
 	snpmin = ''
 	currcount = 0
@@ -156,31 +160,31 @@ for gene in masterdic.keys():
 	if pmin == 1.1:
 		continue
 	#print "Starting up permutations..."
-	if not bonferroni:
-		genep = permer(gene)
+	if bonferroni:
+		genep = min(1,pmin*currcount)
 	else:
-		genep = pmin*currcount
+		genep = permer(gene)
 	winnerdic[gene] = [snpmin, pmin, genep]
 	#completedgenes += 1
 
 #t1 = time.time()
 #print t1-t0
 
-cleanup = 'rm ' + hmdir + '500HT/3chip/*curr_' + chrm + '_pc' + str(pcs) + '*'
+cleanup = 'rm ' + hmdir + '500HT/3chip/*curr_' + chrm + '_pc' + str(pcs) + '_' + correction + '.*'
 ifier(cleanup)
 
 #print "Writing results..."
-aller = open('/mnt/lustre/home/cusanovich/500HT/ByChr/' + chrm + '.PC' + str(pcs) + '.' + mapper + '.' + distance + '.gemma.bonferonni.eqtls.txt','w')
+aller = open('/mnt/lustre/home/cusanovich/500HT/ByChr/' + chrm + '.PC' + str(pcs) + '.' + mapper + '.' + distance + '.' + correction +  '.gemma.eqtls.txt','w')
 for i in xrange(0,len(genes)):
 	print >> aller, '{0}\t{1}\t{2:.4g}'.format(genes[i],snps[i],pvals[i])
 
 aller.close()
 
-winners = open('/mnt/lustre/home/cusanovich/500HT/ByChr/' + chrm + '.PC' + str(pcs) + '.' + mapper + '.' + distance + '.gemma.bonferonni.chosen.txt','w')
+winners = open('/mnt/lustre/home/cusanovich/500HT/ByChr/' + chrm + '.PC' + str(pcs) + '.' + mapper + '.' + distance + correction + '.gemma.chosen.txt','w')
 for gene in sorted(winnerdic.keys()):
 	print >> winners, '{0}\t{1[0]}\t{1[1]:.4g}\t{1[2]:.4g}'.format(gene,winnerdic[gene])
 
 winners.close()
 
-doners = open('/mnt/lustre/home/cusanovich/500HT/ByChr/' + chrm + '.PC' + str(pcs) + '.done','w')
+doners = open('/mnt/lustre/home/cusanovich/500HT/ByChr/' + chrm + '.PC' + str(pcs) + '.' + correction + '.done','w')
 doners.close()

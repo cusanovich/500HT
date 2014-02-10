@@ -101,9 +101,8 @@ except ValueError:
 obsp = robjects.r('function(exprs,genos){\n'
 				 'x = as.numeric(unlist(exprs))\n'
 				 'y = as.numeric(unlist(genos))\n'
-				 'corr = cor.test(x,y,method="spearman",exact=FALSE)$estimate\n'
-				 'pval = cor.test(x,y,method="spearman",exact=FALSE)$p.value\n'
-				 'return(c(corr,pval))}')
+				 'corr = cor.test(x,y,method="spearman",exact=FALSE)\n'
+				 'return(c(corr$estimate,corr$p.value))}')
 ####Function to calculate gene-wise permutation p-value in R
 corp = robjects.r('function(exprs,genos,obsp){\n'
 				  'x = as.numeric(unlist(exprs))\n'
@@ -112,7 +111,7 @@ corp = robjects.r('function(exprs,genos,obsp){\n'
 				  'winners = 0\n'
 				  'for(i in 1:10000){\n'
 				  'currgenos = y[,sample(431)]\n'
-				  'if(dim(y)[1] == 1){permp = cor.test(as.numeric(y),x,method="spearman",exact=FALSE)$p.value\n'
+				  'if(dim(y)[1] == 1){permp = cor.test(as.numeric(currgenos),x,method="spearman",exact=FALSE)$p.value\n'
 				  '}else{permp = min(apply(currgenos,1,function(b){cor.test(as.numeric(b),x,method="spearman",exact=FALSE)$p.value}))}\n'
 				  'if(permp <= z){winners = winners + 1}\n'
 				  'if(winners == 10){\n'
@@ -139,7 +138,7 @@ for gene in masterdic.keys():
 	snping = [0]*len(masterdic[gene])
 	snpmin = []
 	genemin = []
-	pmin = 1
+	pmin = 1.1
 	genolist = []
 	####Pull genotypes for the SNPs in cis, if genotypes not already in dictionary: go to geno file and pull in appropriate data
 	for i, snp in enumerate(masterdic[gene]):
@@ -155,7 +154,7 @@ for gene in masterdic.keys():
 			tabixer.close()
 			y = [genos[index] for index in genoindex]
 			missing = len([k for k, j in enumerate(y) if j == 'NA'])
-			maf = 1 - (float(len([k for k, j in enumerate(y) if j == '2'])*2 + len([k for k, j in enumerate(y) if j == '1']))/float(len(y)*2 - missing))
+			maf = 1 - (float(len([k for k, j in enumerate(y) if j == '2'])*2 + len([k for k, j in enumerate(y) if j == '1']))/float((len(y) - missing)*2))
 			#print maf
 			if missing > 21:
 				genodic[snp] = 'NA'

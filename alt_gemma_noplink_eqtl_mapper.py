@@ -3,25 +3,30 @@ import os
 import sys
 sys.path.append('/mnt/lustre/home/cusanovich/Programs/')
 sys.path.append('/mnt/lustre/home/cusanovich/Programs/lib/python2.6/site-packages/')
+import pysam
+from pysam import Tabixfile
 import subprocess
 import numpy
 import random
+from random import shuffle
+from random import uniform
 import gzip
-import time
+#import time
 
 #if len(sys.argv) != 3:
 #	print "Usage = python gemma_eqtl_mapper.py chr pc"
 #	sys.exit()
-
+bonferroni = True
 chrm = sys.argv[1]
 pcs = sys.argv[2]
 #chrm = 'chr22'
-#pcs = 0
+#pcs = 20
 genodir = '/mnt/lustre/home/cusanovich/500HT/3chip/'
 hmdir = '/mnt/lustre/home/cusanovich/'
 currfiles = genodir + "curr_" + chrm + "_pc" + str(pcs)
 mapper = '3chip'
 distance = '150kb'
+os.chdir(genodir)
 
 def ifier(commander):
 	ify = subprocess.Popen(commander,shell=True)
@@ -38,6 +43,30 @@ def matrix_reader(matrix_file,sep="\t",dtype='|S20'):
 		raws[i,:] = line.strip().split()
 	rawin.close()
 	return raws
+
+def permer(gene):
+	winnerperms = 0
+	for perm in xrange(0,10000):
+		shuffle(randind)
+		updateind = [0,1,2] + randind
+		permgenos = [", ".join([genodic[x][index] for index in updateind]) for x in masterdic[gene]]
+		currbimbam = open(genodir + 'perm_curr_' + chrm + '_pc' + str(pcs) + '.bimbam','w')
+		print >> currbimbam, "\n".join(permgenos)
+		currbimbam.close()
+		print 'Gene No. ' + str(len(winnerdic.keys()) + 1) + ' on chrm.'
+		print str(winnerperms) + ' of ' + str(perm) + ' permutations lost.'
+		gemmer = (hmdir + 'Programs/gemma0.94 -g ' + genodir + 'perm_curr_' + chrm + '_pc' + str(pcs) + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.pcs.txt' + ' -lmm 2 -o perm_curr_' + chrm + '_pc' + str(pcs))
+		ifier(gemmer)
+		permering = open(genodir + 'output/perm_curr_' + chrm + '_pc' + str(pcs) + '.assoc.txt','r')
+		permers = [x.strip().split()[5] for x in permering.readlines()]
+		permers = [float(x) for x in permers if x != 'nan' and x != 'p_lrt']
+		permering.close()
+		permlow = min(permers)
+		if permlow <= pmin:
+			winnerperms += 1
+		if winnerperms == 10:
+			return 11/uniform(perm+2,perm+3)
+	return (winnerperms + 1)/float(10001)
 
 print "Loading expression..."
 mastercols = matrix_reader('/mnt/lustre/home/cusanovich/500HT/hutt.' + mapper + '.' + distance + '.mastercols.txt',dtype='|S15')
@@ -63,119 +92,91 @@ for line in snpbed:
 cover = ('cp ' + hmdir + '500HT/addSNP.500ht.' + mapper + '_order.square.txt ' + currfiles + '.square.txt; cp ' + hmdir + '500HT/Exprs/qqnorm.500ht.' + mapper + '_order.pc' + str(pcs)) + ' ' + currfiles + '.pcs.txt'
 ifier(cover)
 
-
-#completedgenes = 0
 #chr22ers = []
 #for gene in masterdic.keys():
 #	if chrmdic[gene] == chrm:
 #		chr22ers.append(gene)
 
-
+#completedgenes = 0
 pvals = []
 genes = []
 snps = []
 winnerdic = {}
+genodic = {}
+randind = range(3,434)
 #t0 = time.time()
+#Time-savers
+geneappend = genes.append
+snpappend = snps.append
+pvalappend = pvals.append
 
 for gene in masterdic.keys():
 	if chrmdic[gene] != chrm:
 		continue
-#	if completedgenes == 20:
-#		continue
+	#if completedgenes == 2:
+	#	break
 	print gene
-	currbimbam = open(currfiles + '.bimbam','r')
-	####Pull genotypes for the SNPs in cis, if genotypes not already in dictionary: go to geno file and pull in appropriate data
-	for i, snp in enumerate(masterdic[gene]):
-		try:
-			if genodic[snp] == 'NA':
-				continue
-			print >> currbimbam, ", ".join(genodic[snp])
-		except KeyError:
-			#tabixer = pysam.Tabixfile('/mnt/lustre/home/cusanovich/500HT/Imputed1415/ByChr/hutt.imputed.' + chrm + '.txt.gz')
-			tabixer = pysam.Tabixfile('/mnt/lustre/home/cusanovich/500HT/' + mapper + '/ByChr/hutt.' + mapper + '.' + distance + '.' + chrm + '.txt.gz')
-			for record in tabixer.fetch(chrm,int(snpdic[snp][1]),int(snpdic[snp][2])):
-				genos = record.split('\t')
-			tabixer.close()
-			y = [genos[4], 'A', 'G'] + genos[5:len(genos)]
-			missing = len([k for k, j in enumerate(y) if j == 'NA'])
-			maf = 1 - (float(len([k for k, j in enumerate(y) if j == '2'])*2 + len([k for k, j in enumerate(y) if j == '1']))/float(len(y)*2 - missing))
-			#print maf
-			if missing > 21:
-				genodic[snp] = 'NA'
-				continue
-			if maf < 0.05:
-				genodic[snp] = 'NA'
-				continue
-			genodic[snp] = y
-			print >> currbimbam, ", ".join(genodic[snp])
-	currbimbam.close()
 	phener = ('cut -f' + str(int(exprcoldic[gene]) + 1) + ' -d" " ' + hmdir + '500HT/qqnorm.500ht.' + mapper + '_order.bimbam > ' + currfiles + '.pheno')
 	ifier(phener)
+	currgenos = []
+	####Pull genotypes for the SNPs in cis, if genotypes not already in dictionary: go to geno file and pull in appropriate data
+	for snp in masterdic[gene]:
+		try:
+			currgenos.append(", ".join(genodic[snp]))
+		except KeyError:
+			#tabixer = pysam.Tabixfile('/mnt/lustre/home/cusanovich/500HT/Imputed1415/ByChr/hutt.imputed.' + chrm + '.txt.gz')
+			#tabixer = pysam.Tabixfile('/mnt/lustre/home/cusanovich/500HT/' + mapper + '/ByChr/hutt.' + mapper + '.' + distance + '.' + chrm + '.txt.gz')
+			tabixer = Tabixfile('/mnt/lustre/home/cusanovich/500HT/' + mapper + '/ByChr/hutt.' + mapper + '.' + chrm + '.txt.gz')
+			genos = [x.split('\t') for x in tabixer.fetch(chrm,int(snpdic[snp][1]),int(snpdic[snp][2]))][0]
+			tabixer.close()
+			y = [genos[3], 'A', 'G'] + genos[6:len(genos)]
+			genodic[snp] = y
+			currgenos.append(", ".join(genodic[snp]))
+	currbimbam = open(currfiles + '.bimbam','w')
+	print >> currbimbam, "\n".join(currgenos)
+	currbimbam.close()
 	#print "Running GEMMA..."
-	gemmer = ('cd ' + genodir + '; ' + hmdir + 'Programs/gemma0.94 -g ' + currfiles + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.pcs.txt -lmm 2 -o curr_' + chrm + '_pc' + str(pcs))
+	gemmer = (hmdir + 'Programs/gemma0.94 -g ' + currfiles + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.pcs.txt -lmm 2 -o curr_' + chrm + '_pc' + str(pcs))
 	ifier(gemmer)
 	currresults = open(genodir + '/output/curr_' + chrm + '_pc' + str(pcs) + '.assoc.txt','r')
 	pmin = 1.1
 	snpmin = ''
+	currcount = 0
 	for line in currresults:
-		if 'p_lrt' in line:
+		if 'p_lrt' in line or 'nan' in line:
 			continue
 		liner = line.strip().split()
-		if liner[5] == 'nan':
-			continue
-		genes.append(gene)
-		snps.append(liner[1])
-		pvals.append(float(liner[5]))
+		geneappend(gene)
+		snpappend(liner[1])
+		pvalappend(float(liner[5]))
+		currcount = currcount + 1
 		if float(liner[5]) < pmin:
 			pmin = float(liner[5])
 			snpmin = liner[1]
+	if pmin == 1.1:
+		continue
 	#print "Starting up permutations..."
-	winnerperms = 0
-	broken = 0
-	for perm in range(10000):
-		if broken == 1:
-			continue
-		currperm = open(genodir + 'perm_curr_' + chrm + '_pc' + str(pcs) + '.bimbam','w')
-		randind = random.shuffle(range(431))
-		for snp in masterdic[gene]:
-			print >> currperm, ", ".join(genodic[snp][randind])
-		currperm.close()
-		print str(winnerperms)
-		gemmer = ('cd ' + genodir + '; ' + hmdir + 'Programs/gemma0.94 -g ' + genodir + 'perm_curr_' + chrm + '_pc' + str(pcs) + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.pcs.txt' + ' -lmm 2 -o perm_curr_' + chrm + '_pc' + str(pcs))
-		ifier(gemmer)
-		perms = []
-		permer = open(genodir + 'output/perm_curr_' + chrm + '_pc' + str(pcs) + '.assoc.txt','r')
-		permlow = 1
-		for line in permer:
-			liner = line.strip().split()
-			if 'nan' in liner[5] or 'p_lrt' in liner[5]:
-				continue
-			if float(liner[5]) < permlow:
-				permlow = float(liner[5])
-		permer.close()
-		if permlow <= pmin:
-			winnerperms += 1
-		if winnerperms == 10:
-			genep = 11/random.uniform(perm+2,perm+3)
-			broken = 1
-	if broken == 0:
-		genep = (winnerperms + 1)/float(10001)
+	if not bonferroni:
+		genep = permer(gene)
+	else:
+		genep = pmin*currcount
 	winnerdic[gene] = [snpmin, pmin, genep]
-	cleanup = 'rm ' + hmdir + '500HT/3chip/*curr_' + chrm + '_pc' + str(pcs) + '*'
-	ifier(cleanup)
-#	completedgenes += 1
+	#completedgenes += 1
 
 #t1 = time.time()
 #print t1-t0
 
-print "Writing results..."
-aller = open('/mnt/lustre/home/cusanovich/500HT/ByChr/' + chrm + '.PC' + str(pcs) + '.3chip.gemma.eqtls.txt','w')
-for i in range(len(genes)):
+cleanup = 'rm ' + hmdir + '500HT/3chip/*curr_' + chrm + '_pc' + str(pcs) + '*'
+ifier(cleanup)
+
+#print "Writing results..."
+aller = open('/mnt/lustre/home/cusanovich/500HT/ByChr/' + chrm + '.PC' + str(pcs) + '.' + mapper + '.' + distance + '.gemma.bonferonni.eqtls.txt','w')
+for i in xrange(0,len(genes)):
 	print >> aller, '{0}\t{1}\t{2:.4g}'.format(genes[i],snps[i],pvals[i])
 
 aller.close()
 
-winners = open('/mnt/lustre/home/cusanovich/500HT/ByChr/' + chrm + '.PC' + str(pcs) + '.3chip.gemma.chosen.txt','w')
+winners = open('/mnt/lustre/home/cusanovich/500HT/ByChr/' + chrm + '.PC' + str(pcs) + '.' + mapper + '.' + distance + '.gemma.bonferonni.chosen.txt','w')
 for gene in sorted(winnerdic.keys()):
 	print >> winners, '{0}\t{1[0]}\t{1[1]:.4g}\t{1[2]:.4g}'.format(gene,winnerdic[gene])
 

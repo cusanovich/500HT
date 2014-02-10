@@ -64,10 +64,10 @@ snps = []
 winnerdic = {}
 pcdic = {}
 #completedgenes = 0
-#chr22ers = []
-#for gene in masterdic.keys():
-#	if chrmdic[gene] == chrm:
-#		chr22ers.append(gene)
+chr22ers = []
+for gene in masterdic.keys():
+	if chrmdic[gene] == chrm:
+		chr22ers.append(gene)
 
 #t0 = time.time()
 

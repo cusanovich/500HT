@@ -2,7 +2,7 @@ library(qvalue)
 library(plyr)
 library(stringr)
 
-all.pvals <- list.files(path = "/mnt/lustre/home/cusanovich/500HT/eQTLs/",pattern=".3chip.500kb.chosen.txt",full.names=T)
+all.pvals <- list.files(path = "/mnt/lustre/home/cusanovich/500HT/eQTLs/",pattern=".3chip.150kb.bonferroni.gemma.chosen.txt",full.names=T)
 pvals <- llply(all.pvals, read.table)
 
 pval.pcs.names = str_split(all.pvals,"[.]")

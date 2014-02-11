@@ -30,6 +30,7 @@ if bonferroni:
 	correction = 'bonferroni'
 else:
 	correction = 'permutation'
+
 currfiles = genodir + "curr_" + chrm + "_pc" + str(pcs) + "_" + correction
 
 def ifier(commander):
@@ -73,7 +74,7 @@ def permer(gene):
 	return (winnerperms + 1)/float(10001)
 
 print "Loading expression..."
-mastercols = matrix_reader('/mnt/lustre/home/cusanovich/500HT/hutt.' + mapper + '.' + distance + '.mastercols.txt',dtype='|S15')
+mastercols = matrix_reader('/mnt/lustre/home/cusanovich/500HT/hutt.' + mapper + '.' + distance + '.chrmspecific.mastercols.txt',dtype='|S15')
 masterdic = {}
 exprcoldic = {}
 chrmdic = {}
@@ -108,19 +109,19 @@ snps = []
 winnerdic = {}
 genodic = {}
 randind = range(3,434)
-#t0 = time.time()
 #Time-savers
 geneappend = genes.append
 snpappend = snps.append
 pvalappend = pvals.append
+#t0 = time.time()
 
 for gene in masterdic.keys():
 	if chrmdic[gene] != chrm:
 		continue
-	#if completedgenes == 2:
-	#	break
+#	if completedgenes == 5:
+#		break
 	print gene
-	phener = ('cut -f' + str(int(exprcoldic[gene]) + 1) + ' -d" " ' + hmdir + '500HT/qqnorm.500ht.' + mapper + '_order.bimbam > ' + currfiles + '.pheno')
+	phener = ('cut -f' + str(int(exprcoldic[gene]) + 1) + ' -d" " ' + hmdir + '500HT/Exprs/qqnorm.500ht.' + mapper + '_order.' + chrm + '.bimbam > ' + currfiles + '.pheno')
 	ifier(phener)
 	currgenos = []
 	####Pull genotypes for the SNPs in cis, if genotypes not already in dictionary: go to geno file and pull in appropriate data
@@ -180,7 +181,7 @@ for i in xrange(0,len(genes)):
 
 aller.close()
 
-winners = open('/mnt/lustre/home/cusanovich/500HT/ByChr/' + chrm + '.PC' + str(pcs) + '.' + mapper + '.' + distance + correction + '.gemma.chosen.txt','w')
+winners = open('/mnt/lustre/home/cusanovich/500HT/ByChr/' + chrm + '.PC' + str(pcs) + '.' + mapper + '.' + distance + '.' + correction + '.gemma.chosen.txt','w')
 for gene in sorted(winnerdic.keys()):
 	print >> winners, '{0}\t{1[0]}\t{1[1]:.4g}\t{1[2]:.4g}'.format(gene,winnerdic[gene])
 

@@ -16,7 +16,7 @@ def ifier(commander):
 	ify.wait()
 
 for i in range(22,0,-1):
-	eqtler = 'echo "python /mnt/lustre/home/cusanovich/500HT/Scripts/alt_gemma_noplink_eqtl_mapper.py chr' + str(i) + ' ' + str(pcs) + '" | qsub -l h_vmem=2g -o ~/dump/ -e ~/dump/ -N "eQTLs.chr' + str(i) + '.PC' + str(pcs) + '"'
+	eqtler = 'echo "python /mnt/lustre/home/cusanovich/500HT/Scripts/alt_gemma_noplink_eqtl_mapper.py chr' + str(i) + ' ' + str(pcs) + '" | qsub -l h_vmem=1g -V -o ~/dump/ -e ~/dump/ -N "eQTLs.chr' + str(i) + '.PC' + str(pcs) + '"'
 	ifier(eqtler)
 
 while len(glob.glob('/mnt/lustre/home/cusanovich/500HT/ByChr/*.PC' + str(pcs) + '.bonferroni.done')) < 22:

@@ -63,7 +63,7 @@ def permer(gene):
 		gemmer = (hmdir + 'Programs/gemma0.94 -g ' + genodir + 'perm_curr_' + chrm + '_pc' + str(pcs) + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.pcs.txt' + ' -lmm 2 -o perm_curr_' + chrm + '_pc' + str(pcs))
 		ifier(gemmer)
 		permering = open(genodir + 'output/perm_curr_' + chrm + '_pc' + str(pcs) + '.assoc.txt','r')
-		permers = [x.strip().split()[5] for x in permering.readlines()]
+		permers = [x.strip().split()[8] for x in permering.readlines()]
 		permers = [float(x) for x in permers if x != 'nan' and x != 'p_lrt']
 		permering.close()
 		permlow = min(permers)
@@ -153,10 +153,10 @@ for gene in masterdic.keys():
 		liner = line.strip().split()
 		geneappend(gene)
 		snpappend(liner[1])
-		pvalappend(float(liner[5]))
+		pvalappend(float(liner[8]))
 		currcount = currcount + 1
-		if float(liner[5]) < pmin:
-			pmin = float(liner[5])
+		if float(liner[8]) < pmin:
+			pmin = float(liner[8])
 			snpmin = liner[1]
 	if pmin == 1.1:
 		continue

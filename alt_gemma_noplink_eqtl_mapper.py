@@ -94,7 +94,7 @@ for line in snpbed:
 	liner = line.strip().split()
 	snpdic[liner[3]] = liner[0:3]
 
-cover = ('cp ' + hmdir + '500HT/addSNP.500ht.' + mapper + '_order.square.txt ' + currfiles + '.square.txt; cp ' + hmdir + '500HT/Exprs/qqnorm.500ht.' + mapper + '_order.pc' + str(pcs)) + ' ' + currfiles + '.pcs.txt'
+cover = ('cp ' + hmdir + '500HT/addSNP.500ht.' + mapper + '_order.square.txt ' + currfiles + '.square.txt; cp ' + hmdir + '500HT/Exprs/qqnorm.500ht.gccor.' + mapper + '_order.pc' + str(pcs)) + ' ' + currfiles + '.pcs.txt'
 ifier(cover)
 
 #chr22ers = []
@@ -121,7 +121,7 @@ for gene in masterdic.keys():
 #	if completedgenes == 5:
 #		break
 	print gene
-	phener = ('cut -f' + str(int(exprcoldic[gene]) + 1) + ' -d" " ' + hmdir + '500HT/Exprs/qqnorm.500ht.' + mapper + '_order.' + chrm + '.bimbam > ' + currfiles + '.pheno')
+	phener = ('cut -f' + str(int(exprcoldic[gene]) + 1) + ' -d" " ' + hmdir + '500HT/Exprs/qqnorm.500ht.gccor.' + mapper + '_order.' + chrm + '.bimbam > ' + currfiles + '.pheno')
 	ifier(phener)
 	currgenos = []
 	####Pull genotypes for the SNPs in cis, if genotypes not already in dictionary: go to geno file and pull in appropriate data
@@ -175,13 +175,13 @@ cleanup = 'rm ' + hmdir + '500HT/3chip/*curr_' + chrm + '_pc' + str(pcs) + '_' +
 ifier(cleanup)
 
 #print "Writing results..."
-aller = open('/mnt/lustre/home/cusanovich/500HT/ByChr/' + chrm + '.PC' + str(pcs) + '.' + mapper + '.' + distance + '.' + correction +  '.gemma.eqtls.txt','w')
+aller = open('/mnt/lustre/home/cusanovich/500HT/ByChr/' + chrm + '.PC' + str(pcs) + '.' + mapper + '.' + distance + '.' + correction +  '.gccor.gemma.eqtls.txt','w')
 for i in xrange(0,len(genes)):
 	print >> aller, '{0}\t{1}\t{2:.4g}'.format(genes[i],snps[i],pvals[i])
 
 aller.close()
 
-winners = open('/mnt/lustre/home/cusanovich/500HT/ByChr/' + chrm + '.PC' + str(pcs) + '.' + mapper + '.' + distance + '.' + correction + '.gemma.chosen.txt','w')
+winners = open('/mnt/lustre/home/cusanovich/500HT/ByChr/' + chrm + '.PC' + str(pcs) + '.' + mapper + '.' + distance + '.' + correction + '.gccor.gemma.chosen.txt','w')
 for gene in sorted(winnerdic.keys()):
 	print >> winners, '{0}\t{1[0]}\t{1[1]:.4g}\t{1[2]:.4g}'.format(gene,winnerdic[gene])
 

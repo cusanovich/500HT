@@ -13,7 +13,7 @@ for(i in 1:length(pval.pcs.names)){
 names(pvals) = pval.pcs
 inder = order(as.numeric(pval.pcs))
 pvals.o = pvals[inder]
-
+pdf("~/500HT/Scripts/hists.pdf")
 qcounts = c()
 for(i in 1:length(pvals.o)){
   #qs = qvalue(pvals[[i]]$V4)$qvalues
@@ -21,8 +21,9 @@ for(i in 1:length(pvals.o)){
   qcount = sum(qs < 0.05)
   qcounts[i] = qcount
   print(qcount)
-  hist(pvals.o[[i]]$V4)
+  hist(pvals.o[[i]]$V4,xlab="P-value",main=paste0(names(pvals.o)[i]," PCs Removed"))
 }
-
-plot(qcounts,type="b")
+dev.off()
+pdf("~/500HT/Scripts/eqtl.calls.pdf")
+plot(as.numeric(names(pvals.o)),qcounts,xlab="Number of PCs Removed",ylab="No. of eQTLs",type="b",pch=20)
 dev.off()

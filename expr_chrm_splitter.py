@@ -14,7 +14,7 @@ def matrix_reader(matrix_file,sep="\t",dtype='|S20'):
 	return raws
 
 print "Loading master files..."
-exprs = matrix_reader('/mnt/lustre/home/cusanovich/500HT/qqnorm.500ht.gccor.3chip_order.bimbam',sep=" ",dtype='|S10')
+exprs = matrix_reader('/mnt/lustre/home/cusanovich/500HT/qqnorm.500ht.gccor.covcor.3chip_order.bimbam',sep=" ",dtype='|S10')
 mastercols = matrix_reader('/mnt/lustre/home/cusanovich/500HT/hutt.3chip.500kb.mastercols.txt',dtype='|S15')
 
 print "Building dictionaries..."
@@ -39,7 +39,7 @@ for chrm in range(1,23):
 			indices.append(exprcoldic[gene])
 			genes.append(gene)
 	currexpr = exprs[:,indices]
-	numpy.savetxt('/mnt/lustre/home/cusanovich/500HT/Exprs/qqnorm.500ht.gccor.3chip_order.chr' + str(chrm) + '.bimbam',currexpr,delimiter=" ",fmt='%s')
-	genelist = open('/mnt/lustre/home/cusanovich/500HT/Exprs/qqnorm.500ht.gccor.3chip_order.chr' + str(chrm) + '.genes','w')
+	numpy.savetxt('/mnt/lustre/home/cusanovich/500HT/Exprs/qqnorm.500ht.gccor.covcor.3chip_order.chr' + str(chrm) + '.bimbam',currexpr,delimiter=" ",fmt='%s')
+	genelist = open('/mnt/lustre/home/cusanovich/500HT/Exprs/qqnorm.500ht.gccor.covcor.3chip_order.chr' + str(chrm) + '.genes','w')
 	print >> genelist, "\n".join(genes)
 	genelist.close()

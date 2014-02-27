@@ -8,7 +8,7 @@ def ifier(commander):
 	ify = subprocess.Popen(commander,shell=True)
 	ify.wait()
 
-for pc in range(20,41):
+for pc in range(0,41):
 	if len(glob.glob("/mnt/lustre/home/cusanovich/500HT/ByChr/*.PC" + str(pc) + ".bonferroni.done")) == 0:
 		continue
 	for chrm in range(22,0,-1):

@@ -12,7 +12,7 @@ print("GC correcting...")
 expressing = gctable[,1] %in% expressedgenes[,1]
 gctable.expr = gctable[expressing,]
 exoncounts.expr = exoncounts[expressing,]
-cleanedup = withinLaneNormalization(as.matrix(exoncounts.expr[,5]),as.vector(gctable.expr[,3]),which="full",round=F)
+cleanedup = withinLaneNormalization(as.matrix(exoncounts.expr[,5]),as.vector(gctable.expr[,3]),which="full",round=F,num.bins=100)
 exoncounts.cleanedup = exoncounts.expr
 exoncounts.cleanedup$V5 = cleanedup
 print("Writing results...")

@@ -2,7 +2,7 @@
 
 print "Loading SNP names..."
 #genos = open('/mnt/lustre/home/cusanovich/500HT/Imputed1415/imputed_cgi.bim','r')
-genos = open('/mnt/lustre/home/cusanovich/oldhome_nb/Hutterite_Heritability/gemma/Genotypes/hutt.3chip.hg19remap.bim','r')
+genos = open('/mnt/lustre/home/cusanovich/500HT/Imputed1415/hutt.imputed.500ht.bim','r')
 
 genonamed = genos.readlines()
 genonamer = [x.strip().split()[0] for x in genonamed]
@@ -36,11 +36,11 @@ for chrm in range(1,23):
 		chrmexprnames[currchrm][j] = x
 	naming.close()
 
-outfile = open('/mnt/lustre/home/cusanovich/500HT/hutt.3chip.mastercols.txt','w')
-chroutfile = open('/mnt/lustre/home/cusanovich/500HT/hutt.3chip.chrmspecific.mastercols.txt','w')
+outfile = open('/mnt/lustre/home/cusanovich/500HT/hutt.imputed.150kb.mastercols.txt','w')
+chroutfile = open('/mnt/lustre/home/cusanovich/500HT/hutt.imputed.150kb.chrmspecific.mastercols.txt','w')
 
 print "Recording columns..."
-overlaps = open('/mnt/lustre/home/cusanovich/500HT/hutt.3chip.overlap.txt','r')
+overlaps = open('/mnt/lustre/home/cusanovich/500HT/hutt.imputed.150kb.overlap.txt','r')
 for line in overlaps:
 	liner = line.strip().split()
 	chrm = genonamers[liner[1]]

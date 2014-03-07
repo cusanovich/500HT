@@ -23,7 +23,7 @@ genodir = '/mnt/lustre/home/cusanovich/500HT/Imputed1415/'
 print 'Creating raw files...'
 for j in range(1,23):
 	#plinker = 'echo "plink --noweb --nonfounders --maf 0.05 --geno 0.05 --bfile ' + genodir + 'imputed_cgi --chr ' + str(j) + ' --make-bed --out ' + genodir + 'ByChr/hutt.imputed.chr' + str(j) + '; plink --bfile ' + genodir + 'ByChr/hutt.imputed.chr' + str(j) + ' --recodeA --out ' + genodir + 'ByChr/hutt.imputed.chr' + str(j) + '; touch ' + genodir + 'ByChr/chr' + str(j) + '.done" | qsub -l h_vmem=2g -o ~/dump/ -e ~/dump/'
-	plinker = 'echo "plink --noweb --nonfounders --bfile ' + genodir + 'hutt.imputed --chr ' + str(j) + ' --make-bed --out ' + genodir + 'ByChr/hutt.imputed.chr' + str(j) + '; plink --bfile ' + genodir + 'ByChr/hutt.imputed.chr' + str(j) + ' --recodeA --out ' + genodir + 'ByChr/hutt.imputed.chr' + str(j) + '; touch ' + genodir + 'ByChr/chr' + str(j) + '.done" | qsub -l h_vmem=2g -o ~/dump/ -e ~/dump/'
+	plinker = 'echo "plink --noweb --nonfounders --bfile ' + genodir + 'hutt.imputed.500ht --chr ' + str(j) + ' --make-bed --out ' + genodir + 'ByChr/hutt.imputed.chr' + str(j) + '; plink --bfile ' + genodir + 'ByChr/hutt.imputed.chr' + str(j) + ' --recodeA --out ' + genodir + 'ByChr/hutt.imputed.chr' + str(j) + '; touch ' + genodir + 'ByChr/chr' + str(j) + '.done" | qsub -l h_vmem=2g -o ~/dump/ -e ~/dump/'
 	ifier(plinker)
 
 while len(glob.glob(genodir + 'ByChr/*.done')) < 22:

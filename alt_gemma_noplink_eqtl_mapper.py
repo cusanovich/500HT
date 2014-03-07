@@ -24,10 +24,10 @@ chrm = sys.argv[1]
 pcs = sys.argv[2]
 #chrm = 'chr22'
 #pcs = 1
-genodir = '/mnt/lustre/home/cusanovich/500HT/3chip/'
+genodir = '/mnt/lustre/home/cusanovich/500HT/Imputed1415/'
 os.chdir(genodir)
 hmdir = '/mnt/lustre/home/cusanovich/'
-mapper = '.3chip'
+mapper = '.imputed'
 distance = '150kb'
 if bonferroni:
 	correction = 'bonferroni'
@@ -109,20 +109,20 @@ for i in range(mastercols.shape[0]):
 ####Build a dictionary to reference the genomic coordinates of each SNP
 print "Loading SNP annotations..."
 snpdic = {}
-snpbed = open('/mnt/lustre/home/cusanovich/500HT/hutt.3chip.hg19.bed','r')
+snpbed = open('/mnt/lustre/home/cusanovich/500HT/hutt.imputed.coord.bed','r')
 for line in snpbed:
 	liner = line.strip().split()
 	snpdic[liner[3]] = liner[0:3]
 
-cover = ('cp ' + hmdir + '500HT/addSNP.500ht' + mapper + '_order.square.txt ' + currfiles + '.square.txt')
+cover = ('cp ' + hmdir + '500HT/addSNP.500ht.ordered.square.txt ' + currfiles + '.square.txt')
 ifier(cover)
 
 if regressPCs:
-	expressed = matrix_reader(hmdir + '500HT/qqnorm.500ht' + gccor + covcor + mapper + '_order.bimbam',dtype='float')
-	pcmat = matrix_reader(hmdir + '500HT/Exprs/qqnorm.500ht' + gccor + covcor + mapper + '_order.pc' + str(pcs),dtype='float')
+	expressed = matrix_reader(hmdir + '500HT/qqnorm.500ht' + gccor + covcor + '.ordered.bimbam',dtype='float')
+	pcmat = matrix_reader(hmdir + '500HT/Exprs/qqnorm.500ht' + gccor + covcor + '.ordered.pc' + str(pcs),dtype='float')
 
 if not regressPCs:
-	cover = ('cp ' + hmdir + '500HT/Exprs/qqnorm.500ht' + gccor + covcor + mapper + '_order.pc' + str(pcs) + ' ' + currfiles + '.pcs.txt')
+	cover = ('cp ' + hmdir + '500HT/Exprs/qqnorm.500ht' + gccor + covcor + '.ordered.pc' + str(pcs) + ' ' + currfiles + '.pcs.txt')
 	ifier(cover)
 
 if regressPCs and int(pcs) != 0:
@@ -166,8 +166,8 @@ for gene in masterdic.keys():
 		numpy.savetxt(currfiles + '.pheno',Yfit[exprcoldic[gene],],delimiter='\n',fmt='%s')
 	if not regressPCs:
 		phener = ('cut -f' + str(int(exprcoldic[gene]) + 1) + ' -d" " ' +
-			hmdir + '500HT/Exprs/qqnorm.500ht' + gccor + covcor + mapper +
-			'_order.' + chrm + '.bimbam > ' + currfiles + '.pheno')
+			hmdir + '500HT/Exprs/qqnorm.500ht' + gccor + covcor +
+			'.ordered.' + chrm + '.bimbam > ' + currfiles + '.pheno')
 		ifier(phener)
 	currgenos = []
 	####Pull genotypes for the SNPs in cis, if genotypes not already in dictionary: go to geno file and pull in appropriate data
@@ -177,7 +177,7 @@ for gene in masterdic.keys():
 		except KeyError:
 			#tabixer = pysam.Tabixfile('/mnt/lustre/home/cusanovich/500HT/Imputed1415/ByChr/hutt.imputed.' + chrm + '.txt.gz')
 			#tabixer = pysam.Tabixfile('/mnt/lustre/home/cusanovich/500HT/' + mapper + '/ByChr/hutt.' + mapper + '.' + distance + '.' + chrm + '.txt.gz')
-			tabixer = Tabixfile('/mnt/lustre/home/cusanovich/500HT/3chip/ByChr/hutt' + mapper + '.' + chrm + '.txt.gz')
+			tabixer = Tabixfile('/mnt/lustre/home/cusanovich/500HT/Imputed1415/ByChr/hutt' + mapper + '.' + chrm + '.txt.gz')
 			genos = [x.split('\t') for x in tabixer.fetch(chrm,int(snpdic[snp][1]),int(snpdic[snp][2]))][0]
 			tabixer.close()
 			y = [genos[3], 'A', 'G'] + genos[6:len(genos)]
@@ -221,7 +221,7 @@ for gene in masterdic.keys():
 #t1 = time.time()
 #print t1-t0
 
-cleanup = 'rm ' + hmdir + '500HT/3chip/*curr_' + chrm + '_pc' + str(pcs) + '_' + correction + '.*'
+cleanup = 'rm ' + genodir + '*curr_' + chrm + '_pc' + str(pcs) + '_' + correction + '.*'
 ifier(cleanup)
 
 #print "Writing results..."

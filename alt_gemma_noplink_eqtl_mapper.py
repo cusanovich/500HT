@@ -75,7 +75,7 @@ def permer(gene):
 		currbimbam.close()
 		print 'Gene No. ' + str(len(winnerdic.keys()) + 1) + ' on chrm.'
 		print str(winnerperms) + ' of ' + str(perm) + ' permutations lost.'
-		gemmer = (hmdir + 'Programs/gemma0.94 -g ' + genodir + 'perm_curr_' + chrm + '_pc' + str(pcs) + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.pcs.txt' + ' -lmm 4 -o perm_curr_' + chrm + '_pc' + str(pcs))
+		gemmer = (hmdir + 'Programs/gemma0.94 -g ' + genodir + 'perm_curr_' + chrm + '_pc' + str(pcs) + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.pcs.txt' + ' -lmm 4 -maf 0.05 -o perm_curr_' + chrm + '_pc' + str(pcs))
 		ifier(gemmer)
 		permering = open(genodir + 'output/perm_curr_' + chrm + '_pc' + str(pcs) + '.assoc.txt','r')
 		permers = [x.strip().split()[12] for x in permering.readlines()]
@@ -188,10 +188,10 @@ for gene in masterdic.keys():
 	currbimbam.close()
 	#print "Running GEMMA..."
 	if regressPCs:
-		gemmer = (hmdir + 'Programs/gemma0.94 -g ' + currfiles + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -lmm 4 -o curr_' + chrm + '_pc' + str(pcs) + '_' + correction)
+		gemmer = (hmdir + 'Programs/gemma0.94 -g ' + currfiles + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -lmm 4 -maf 0.05 -o curr_' + chrm + '_pc' + str(pcs) + '_' + correction)
 		ifier(gemmer)
 	if not regressPCs:
-		gemmer = (hmdir + 'Programs/gemma0.94 -g ' + currfiles + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.pcs.txt -lmm 4 -o curr_' + chrm + '_pc' + str(pcs) + '_' + correction)
+		gemmer = (hmdir + 'Programs/gemma0.94 -g ' + currfiles + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.pcs.txt -lmm 4 -maf 0.05 -o curr_' + chrm + '_pc' + str(pcs) + '_' + correction)
 		ifier(gemmer)
 	currresults = open(genodir + '/output/curr_' + chrm + '_pc' + str(pcs) + '_' + correction + '.assoc.txt','r')
 	pmin = 1.1

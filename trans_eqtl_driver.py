@@ -8,15 +8,29 @@ sys.path.append('/mnt/lustre/home/cusanovich/Programs/')
 sys.path.append('/mnt/lustre/home/cusanovich/Programs/lib/python2.6/site-packages/')
 from myfuncs import ifier
 
-for i in range(22,0,-1):
-	eqtler = 'echo "python /mnt/lustre/home/cusanovich/500HT/Scripts/trans_mapper.py ' + str(i) + '" | qsub -l h_vmem=2g, -V -o ~/dump/ -e ~/dump/ -N "trans_eQTLs.chr' + str(i) + '"'
+i = sys.argv[1]
+linecounter = subprocess.Popen('wc -l /mnt/lustre/home/cusanovich/500HT/Exprs/qqnorm.500ht.gccor.covcor.3chip_order.chr' + str(i) + '.genes', shell=True, stdout=subprocess.PIPE)
+linecount = int(linecounter.communicate()[0].strip().split()[0])
+blocks = linecount/100
+for j in range(blocks):
+	eqtler = 'echo "python /mnt/lustre/home/cusanovich/500HT/Scripts/trans_mapper.py ' + str(i) + ' ' + str(100*j) + ' ' + str(100*(j+1)) + '" | qsub -l h_vmem=2g -V -o ~/dump/ -e ~/dump/ -N "trans.chr' + str(i) + '.block' + str(j) + '"'
 	ifier(eqtler)
 
-#while len(glob.glob('/mnt/lustre/home/cusanovich/500HT/ByChr/*.PC' + str(pcs) + '.bonferroni.done')) < 22:
-#	time.sleep(300)
+remained = linecount%100
+eqtler = 'echo "python /mnt/lustre/home/cusanovich/500HT/Scripts/trans_mapper.py ' + str(i) + ' ' + str(100*blocks) + ' ' + str(100*(blocks) + remained) + '" | qsub -l h_vmem=2g -V -o ~/dump/ -e ~/dump/ -N "trans.chr' + str(i) + '.block' + str(blocks) + '"'
+ifier(eqtler)
 
-#cleanup = "rm /mnt/lustre/home/cusanovich/500HT/ByChr/*.PC" + str(pcs) + ".bonferroni.done"
-#ifier(cleanup)
+while len(glob.glob('/mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) + '.*.done')) < (blocks + 1):
+	time.sleep(300)
 
-#masterer = 'cat /mnt/lustre/home/cusanovich/500HT/ByChr/*.PC' + str(pcs) + '.imputed.150kb.bonferroni.gccor.covcor.regressPCs.gemma.eqtls.txt | sort -k1,1 -k2,2 > /mnt/lustre/home/cusanovich/500HT/eQTLs/master.PC' + str(pcs) + '.imputed.150kb.bonferroni.gccor.covcor.regressPCs.gemma.eqtls.txt; cat /mnt/lustre/home/cusanovich/500HT/ByChr/*.PC' + str(pcs) + '.imputed.150kb.bonferroni.gccor.covcor.regressPCs.gemma.chosen.txt | sort -k1,1 >  /mnt/lustre/home/cusanovich/500HT/eQTLs/master.PC' + str(pcs) + '.imputed.150kb.bonferroni.gccor.covcor.regressPCs.gemma.chosen.txt'
-#ifier(masterer)
+cleanup = "rm /mnt/lustre/home/cusanovich/500HT/ByChr/chr" + str(i) + ".*.done"
+ifier(cleanup)
+
+masterer = 'cat /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) + '.*.trans.pvals.txt > /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) + '.trans.pvals.txt; cat /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) + '.*.trans.sig.txt >  /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) + '.trans.sig.txt'
+ifier(masterer)
+
+cleanup = 'rm /mnt/lustre/home/cusanovich/500HT/Imputed1415/chr' + i + '.fam; rm /mnt/lustre/home/cusanovich/500HT/Imputed1415/chr' + i + '.bed; rm /mnt/lustre/home/cusanovich/500HT/Imputed1415/chr' + i + '.bim; rm /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + i + '.block*'
+ifier(cleanup)
+
+zipper = 'gzip /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) + '.trans.pvals.txt'
+ifier(zipper)

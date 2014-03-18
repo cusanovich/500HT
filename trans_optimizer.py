@@ -12,7 +12,7 @@ import rpy2.robjects as robjects
 import random
 
 corr = robjects.r('function(master,target){\n'
-				 'corr = cor.test(master,target,method="spearman",exact=FALSE)\n'
+				 'corr = cor.test(master,target,method="pearson",exact=FALSE)\n'
 				 'return(c(abs(corr$estimate),corr$p.value))}')
 
 padjcounter = robjects.r('function(ps){\n'
@@ -125,13 +125,14 @@ for pc in range(pcs):
 	totalrandps[pccounter] = bonfcounter(tfrandps)
 	print totalps[pccounter]
 	print totalrandps[pccounter]
+	sys.stdout.flush()
 	pccounter += 1
 
-outfile = open('/mnt/lustre/home/cusanovich/500HT/trans_maximizer.txt','w')
-for z in range(len(totalcor)):
-	print >> outfile, str(totalcor[z]) + '\t' + str(totalps[z]) + '\t' + str(totalrandcor[z]) + '\t' + str(totalrandps[z])
+#outfile = open('/mnt/lustre/home/cusanovich/500HT/trans_maximizer.txt','w')
+#for z in range(len(totalcor)):
+#	print >> outfile, str(totalcor[z]) + '\t' + str(totalps[z]) + '\t' + str(totalrandcor[z]) + '\t' + str(totalrandps[z])
 
-outfile.close()
+#outfile.close()
 
 print max(totalcor)
 print totalcor.index(max(totalcor))

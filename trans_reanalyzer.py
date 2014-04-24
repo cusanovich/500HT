@@ -52,6 +52,7 @@ winners = []
 winningps = []
 winningbonf = []
 genes = []
+sherlockfile = open('../eQTLs/remaster.sherlock.txt','w')
 for chrm in files:
 	currchrm = gzip.open(chrm)
 	for line in currchrm:
@@ -68,16 +69,27 @@ for chrm in files:
 			try:
 				tester = float(snp)
 				currnotcisers += 1
+				if tester < 0.001:
+					print >> sherlockfile, liner[0] + '\t' + rsnos[counter] + '\t' + str(tester) + '\t0'
 				if tester < currwinning:
 					currwinning = float(snp)
 					currwinner = rsnos[counter]
 			except ValueError:
-				pass
+				if 'ENSG' in snp:
+					continue
+				try:
+					tester = float(snp.split('(cis)')[0])
+					if tester < 0.1:
+						print >> sherlockfile, liner[0] + '\t' + rsnos[counter] + '\t' + str(tester) + '\t1'
+				except ValueError:
+					print 'No. ' + str(counter) + ': ' + chrm + ' ' + rsnos[counter] + ' bad!'
+					pass
 		winners.append(currwinner)
 		winningps.append(currwinning)
 		winningbonf.append(min(currwinning*currnotcisers,1))
 		notcisers = notcisers + currnotcisers
 
+sherlockfile.close()
 print "Writing cislike file..."
 sys.stdout.flush()
 cislike = open('../eQTLs/trans.cislike.pvals.txt','w')

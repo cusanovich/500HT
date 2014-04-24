@@ -26,7 +26,13 @@ while len(glob.glob('/mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) + '.*
 cleanup = "rm /mnt/lustre/home/cusanovich/500HT/ByChr/chr" + str(i) + ".*.done"
 ifier(cleanup)
 
-masterer = 'cat /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) + '.*.trans.pvals.txt > /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) + '.trans.pvals.txt; cat /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) + '.*.trans.sig.txt >  /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) + '.trans.sig.txt'
+masterer = ('cat /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) +
+	'.*.trans.pvals.txt > /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) +
+	'.trans.pvals.txt; cat /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) +
+	'.*.trans.sig.txt >  /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) +
+	'.trans.sig.txt; cat /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) +
+	'.*.sherlock.txt >  /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) +
+	'.sherlock.txt')
 ifier(masterer)
 
 cleanup = 'rm /mnt/lustre/home/cusanovich/500HT/Imputed1415/chr' + i + '.fam; rm /mnt/lustre/home/cusanovich/500HT/Imputed1415/chr' + i + '.bed; rm /mnt/lustre/home/cusanovich/500HT/Imputed1415/chr' + i + '.bim; rm /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + i + '.block*'

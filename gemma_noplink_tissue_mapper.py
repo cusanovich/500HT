@@ -13,13 +13,6 @@ from random import uniform
 import gzip
 #import time
 
-#if len(sys.argv) != 3:
-#	print "Usage = python gemma_eqtl_mapper.py chr pc"
-#	sys.exit()
-gccorrection = True
-covcorrection = True
-bonferroni = True
-regressPCs = True
 chrm = sys.argv[1]
 pcs = sys.argv[2]
 #chrm = 'chr22'
@@ -27,31 +20,15 @@ pcs = sys.argv[2]
 genodir = '/mnt/lustre/home/cusanovich/500HT/Imputed1415/'
 os.chdir(genodir)
 hmdir = '/mnt/lustre/home/cusanovich/'
-mapper = '.imputed'
-distance = '150kb'
-if bonferroni:
-	correction = 'bonferroni'
-else:
-	correction = 'permutation'
-
-gccor = ''
-covcor = ''
-regressed = ''
-if gccorrection:
-	gccor = '.gccor'
-
-if covcorrection:
-	covcor = '.covcor'
-
-if regressPCs:
-	regressed = '.regressPCs'
 
 currfiles = genodir + "curr_" + chrm + "_pc" + str(pcs) + "_" + correction
 
+# This function just makes it easier to communicate with the shell from Python
 def ifier(commander):
 	ify = subprocess.Popen(commander,shell=True)
 	ify.wait()
 
+# This function just makes python read in big data files all at once more efficiently
 def matrix_reader(matrix_file,sep="\t",dtype='|S20'):
 	linecounter = subprocess.Popen('wc -l ' + matrix_file, shell=True, stdout=subprocess.PIPE)
 	linecount = int(linecounter.communicate()[0].strip().split()[0])
@@ -64,23 +41,29 @@ def matrix_reader(matrix_file,sep="\t",dtype='|S20'):
 	rawin.close()
 	return raws
 
+# This is the bit about running permutations
 def permer(gene):
 	winnerperms = 0
 	for perm in xrange(0,10000):
+		# First we permute the genotypes and write them out to a file (bimbam format)
 		shuffle(randind)
 		updateind = [0,1,2] + randind
-		permgenos = [", ".join([genodic[x][index] for index in updateind]) for x in masterdic[gene]]
+		permgenos = [", ".join([genodic[x][index] for index in updateind]) for x in masterdic[gene]]	#this permutes genotypes
 		currbimbam = open(genodir + 'perm_curr_' + chrm + '_pc' + str(pcs) + '.bimbam','w')
 		print >> currbimbam, "\n".join(permgenos)
 		currbimbam.close()
+		# These just report where we are.  We can switch all the gene count to phenotype count.
 		print 'Gene No. ' + str(len(winnerdic.keys()) + 1) + ' on chrm.'
 		print str(winnerperms) + ' of ' + str(perm) + ' permutations lost.'
+		# This runs gemma on the permuted genotypes
 		gemmer = (hmdir + 'Programs/gemma0.94 -g ' + genodir + 'perm_curr_' + chrm + '_pc' + str(pcs) + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.pcs.txt' + ' -lmm 4 -maf 0.05 -o perm_curr_' + chrm + '_pc' + str(pcs))
 		ifier(gemmer)
+		# This reads in the GEMMA results.
 		permering = open(genodir + 'output/perm_curr_' + chrm + '_pc' + str(pcs) + '.assoc.txt','r')
 		permers = [x.strip().split()[12] for x in permering.readlines()]
 		permers = [float(x) for x in permers if x != 'nan' and x != 'p_lrt']
 		permering.close()
+		# For eQTLs I was picking the smallest cis p-val, we should change this to run the enrichment scripts and then count winners for each tissue
 		permlow = min(permers)
 		if permlow <= pmin:
 			winnerperms += 1
@@ -89,11 +72,8 @@ def permer(gene):
 	return (winnerperms + 1)/float(10001)
 
 print "Loading expression..."
-if regressPCs:
-	mastercols = matrix_reader('/mnt/lustre/home/cusanovich/500HT/hutt' + mapper + '.' + distance + '.mastercols.txt',dtype='|S15')
-
-if not regressPCs:
-	mastercols = matrix_reader('/mnt/lustre/home/cusanovich/500HT/hutt' + mapper + '.' + distance + '.chrmspecific.mastercols.txt',dtype='|S15')
+# This built up a list cis eQTLs, we can remove references to it
+mastercols = matrix_reader('/mnt/lustre/home/cusanovich/500HT/hutt' + mapper + '.' + distance + '.mastercols.txt',dtype='|S15')
 
 masterdic = {}
 exprcoldic = {}
@@ -114,29 +94,13 @@ for line in snpbed:
 	liner = line.strip().split()
 	snpdic[liner[3]] = liner[0:3]
 
+#Just copies covariance matrix so parallel processes don't all have to hit the same file over and over
 cover = ('cp ' + hmdir + '500HT/addSNP.500ht.ordered.square.txt ' + currfiles + '.square.txt')
 ifier(cover)
 
-if regressPCs:
-	expressed = matrix_reader(hmdir + '500HT/qqnorm.500ht' + gccor + covcor + '.ordered.bimbam',dtype='float')
-	pcmat = matrix_reader(hmdir + '500HT/Exprs/qqnorm.500ht' + gccor + covcor + '.ordered.pc' + str(pcs),dtype='float')
-
-if not regressPCs:
-	cover = ('cp ' + hmdir + '500HT/Exprs/qqnorm.500ht' + gccor + covcor + '.ordered.pc' + str(pcs) + ' ' + currfiles + '.pcs.txt')
-	ifier(cover)
-
-if regressPCs and int(pcs) != 0:
-	mod1 = pcmat
-	mod2 = mod1.T
-	Y = expressed.T
-	W = pcmat[:,1:(int(pcs)+1)]
-	mods = mod2.dot(mod1)
-	inversemods = numpy.linalg.inv(mods)
-	gammahat = Y.dot(mod1).dot(inversemods)[:,1:mods.shape[1]]
-	Yfit = Y - gammahat.dot(W.T)
-
-if regressPCs and int(pcs) == 0:
-	Yfit = expressed.T
+#Copy phenotype fill to curr directory
+cover = ('cp ' + hmdir + '[SOME GWAS PHENOTYPE FILE] ' + currfiles + '.pheno')
+ifier(cover)
 
 #chr22ers = []
 #for gene in masterdic.keys():
@@ -162,13 +126,6 @@ for gene in masterdic.keys():
 #	if completedgenes == 5:
 #		break
 	print gene
-	if regressPCs:
-		numpy.savetxt(currfiles + '.pheno',Yfit[exprcoldic[gene],],delimiter='\n',fmt='%s')
-	if not regressPCs:
-		phener = ('cut -f' + str(int(exprcoldic[gene]) + 1) + ' -d" " ' +
-			hmdir + '500HT/Exprs/qqnorm.500ht' + gccor + covcor +
-			'.ordered.' + chrm + '.bimbam > ' + currfiles + '.pheno')
-		ifier(phener)
 	currgenos = []
 	####Pull genotypes for the SNPs in cis, if genotypes not already in dictionary: go to geno file and pull in appropriate data
 	for snp in masterdic[gene]:

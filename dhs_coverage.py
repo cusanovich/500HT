@@ -1,6 +1,6 @@
-infile = open("/mnt/lustre/home/cusanovich/500HT/dhs_and_gaps.bed","r")
-outfile1 = open("/mnt/lustre/home/cusanovich/500HT/dhs_sizes.txt","w")
-outfile2 = open("/mnt/lustre/home/cusanovich/500HT/dhs_gap_sizes.txt","w")
+infile = open("/mnt/lustre/home/cusanovich/500HT/dhs_and_gaps_union.bed","r")
+outfile1 = open("/mnt/lustre/home/cusanovich/500HT/dhs_union_sizes.txt","w")
+outfile2 = open("/mnt/lustre/home/cusanovich/500HT/dhs_gap_union_sizes.txt","w")
 chrm = ''
 gaps = []
 for line in infile:

@@ -16,7 +16,7 @@ for x, j in enumerate(genonamed):
 genos.close()
 
 print "Loading gene names..."
-naming = open('/mnt/lustre/home/cusanovich/500HT/genenames.500ht.txt','r')
+naming = open('/mnt/lustre/home/cusanovich/500HT/qqnorm.500ht.gccor.newcovcor.genenames.txt','r')
 exprnamed = naming.readlines()
 exprnamed = [x.strip().split()[0] for x in exprnamed]
 exprnames = {}
@@ -28,7 +28,7 @@ naming.close()
 chrmexprnames = {}
 for chrm in range(1,23):
 	currchrm = 'chr' + str(chrm)
-	naming = open('/mnt/lustre/home/cusanovich/500HT/Exprs/qqnorm.500ht.3chip_order.' + currchrm + '.genes','r')
+	naming = open('/mnt/lustre/home/cusanovich/500HT/Exprs/qqnorm.500ht.gccor.newcovcor.ordered.' + currchrm + '.genes','r')
 	exprnamed = naming.readlines()
 	exprnamed = [x.strip().split()[0] for x in exprnamed]
 	chrmexprnames[currchrm] = {}
@@ -36,11 +36,11 @@ for chrm in range(1,23):
 		chrmexprnames[currchrm][j] = x
 	naming.close()
 
-outfile = open('/mnt/lustre/home/cusanovich/500HT/hutt.imputed.150kb.mastercols.txt','w')
-chroutfile = open('/mnt/lustre/home/cusanovich/500HT/hutt.imputed.150kb.chrmspecific.mastercols.txt','w')
+outfile = open('/mnt/lustre/home/cusanovich/500HT/hutt.imputed.1Mb.mastercols.txt','w')
+chroutfile = open('/mnt/lustre/home/cusanovich/500HT/hutt.imputed.1Mb.chrmspecific.mastercols.txt','w')
 
 print "Recording columns..."
-overlaps = open('/mnt/lustre/home/cusanovich/500HT/hutt.imputed.150kb.overlap.txt','r')
+overlaps = open('/mnt/lustre/home/cusanovich/500HT/hutt.imputed.1Mb.overlap.txt','r')
 for line in overlaps:
 	liner = line.strip().split()
 	chrm = genonamers[liner[1]]

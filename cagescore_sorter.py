@@ -75,7 +75,7 @@ m=0
 for bedrecord in chrs.keys():
     if bedrecord not in exprs:
         continue
-    if len(chrs[bedrecord]) == 1:
+    if len(chrs[bedrecord]) == 1 and biotypes[bedrecord] == 'protein_coding':
         print >> newbed, chrs[bedrecord][0] + '\t' + str(starts[bedrecord][0]) + '\t' + str(ends[bedrecord][0]) + '\t' + bedrecord + '\t' + str(scores[bedrecord][0]) + '\t' + strands[bedrecord][0]
         j += 1
         continue
@@ -100,7 +100,7 @@ for bedrecord in chrs.keys():
             newend = int(max(newstarts))
         newstart = newend - 1
         newscore = "_".join(wins)
-        print >> newbed, chra + '\t' + str(newstart) + '\t' + str(newend) + '\t' + bedrecord + '\t' + newscore + '\t' + stranda
+        #print >> newbed, chra + '\t' + str(newstart) + '\t' + str(newend) + '\t' + bedrecord + '\t' + newscore + '\t' + stranda
         k += 1
         continue
     coding = []

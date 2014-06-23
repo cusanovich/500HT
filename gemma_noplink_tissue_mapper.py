@@ -25,29 +25,36 @@ hmdir = '/mnt/lustre/home/cusanovich/'
 currfiles = genodir + "curr_" + chrm + "_pc" + str(pcs) + "_" + correction
 
 # This is the bit about running permutations
-def permer(gene):
-	winnerperms = 0
+def permer(scores=currscores, circuit=currperms, permwins=currpermwins, actives=curractive):
 	for perm in xrange(0,10000):
+		if actives.count(0) == 0:
+			continue
 		# First we permute the genotypes and write them out to a file (bimbam format)
 		shuffle(randind)
 		updateind = [0,1,2] + randind
-		permgenos = [", ".join([genodic[x][index] for index in updateind]) for x in masterdic[gene]]	#this permutes genotypes
-		currbimbam = open(genodir + 'perm_curr_' + chrm + '_pc' + str(pcs) + '.bimbam','w')
-		print >> currbimbam, "\n".join(permgenos)
-		currbimbam.close()
-		# These just report where we are.  We can switch all the gene count to phenotype count.
-		print 'Gene No. ' + str(len(winnerdic.keys()) + 1) + ' on chrm.'
-		print str(winnerperms) + ' of ' + str(perm) + ' permutations lost.'
+		permbimbam = open(genodir + 'perm_curr.bimbam','w')
+		for snp in masterdic[gene]:
+			tabixer = Tabixfile('/mnt/lustre/home/cusanovich/500HT/Imputed1415/ByChr/hutt' + mapper + '.' + chrm + '.txt.gz')
+			genos = [x.split('\t') for x in tabixer.fetch(chrm,int(snpdic[snp][1]),int(snpdic[snp][2]))][0]
+			tabixer.close()
+			y = [genos[3], 'A', 'G'] + genos[6:len(genos)]
+			yrand = y[updateind]
+			print >> permbimbam, ", ".join(yrand)
+		permbimbam.close()
 		# This runs gemma on the permuted genotypes
-		gemmer = (hmdir + 'Programs/gemma0.94 -g ' + genodir + 'perm_curr_' + chrm + '_pc' + str(pcs) + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.pcs.txt' + ' -lmm 4 -maf 0.05 -o perm_curr_' + chrm + '_pc' + str(pcs))
+		gemmer = (hmdir + 'Programs/gemma0.94 -g ' + genodir + 'perm_curr.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.covs.txt' + ' -lmm 4 -maf 0.05 -o perm_curr')
 		ifier(gemmer)
-		# This reads in the GEMMA results.
-		permering = open(genodir + 'output/perm_curr_' + chrm + '_pc' + str(pcs) + '.assoc.txt','r')
-		permers = [x.strip().split()[12] for x in permering.readlines()]
-		permers = [float(x) for x in permers if x != 'nan' and x != 'p_lrt']
-		permering.close()
+		permresults = matrix_reader(genodir + 'output/perm_curr.assoc.txt',dtype='f8')
+		permsort = permresults[permresults[:,12].argsort()]
+		permwins = permsort[0:100,]
+		permscores = [0]*len(dhsdic[dhs.keys()[0]])
+		for snp in permwins[:,1]:
+			permscores = permscores + dhsdic[snp]
 		# For eQTLs I was picking the smallest cis p-val, we should change this to run the enrichment scripts and then count winners for each tissue
-		permlow = min(permers)
+		for z in xrange(len(permscores)):
+			if actives[z] == 1:
+				continue
+			if permscores[z] > 	
 		if permlow <= pmin:
 			winnerperms += 1
 		if winnerperms == 10:
@@ -97,8 +104,8 @@ for gene in masterdic.keys():
 	#print "Running GEMMA..."
 	gemmer = (hmdir + 'Programs/gemma0.94 -g ' + currfiles + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -lmm 4 -maf 0.05 -o curr_' + chrm + '_pc' + str(pcs) + '_' + correction)
 	ifier(gemmer)
-	currresults = open(genodir + '/output/curr_' + chrm + '_pc' + str(pcs) + '_' + correction + '.assoc.txt','r')
-	currresults = matrix_reader(genodir + '/output/curr_' + chrm + '_pc' + str(pcs) + '_' + correction + '.assoc.txt',dtype='f8')
+	currresults = open(genodir + 'output/curr_' + chrm + '_pc' + str(pcs) + '_' + correction + '.assoc.txt','r')
+	currresults = matrix_reader(genodir + 'output/curr_' + chrm + '_pc' + str(pcs) + '_' + correction + '.assoc.txt',dtype='f8')
 	currsort = curresults[currresults[:,12].argsort()]
 	currwins = currsort[0:100,]
 	currscores = [0]*len(dhsdic[dhs.keys()[0]])

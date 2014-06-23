@@ -25,5 +25,5 @@ while len(glob.glob('/mnt/lustre/home/cusanovich/500HT/ByChr/*.PC' + str(pcs) + 
 cleanup = "rm /mnt/lustre/home/cusanovich/500HT/ByChr/*.PC" + str(pcs) + ".bonferroni.done"
 ifier(cleanup)
 
-masterer = 'cat /mnt/lustre/home/cusanovich/500HT/ByChr/*.PC' + str(pcs) + '.imputed.150kb.bonferroni.gccor.covcor.regressPCs.gemma.eqtls.txt | sort -k1,1 -k2,2 > /mnt/lustre/home/cusanovich/500HT/eQTLs/master.PC' + str(pcs) + '.imputed.150kb.bonferroni.gccor.covcor.regressPCs.gemma.eqtls.txt; cat /mnt/lustre/home/cusanovich/500HT/ByChr/*.PC' + str(pcs) + '.imputed.150kb.bonferroni.gccor.covcor.regressPCs.gemma.chosen.txt | sort -k1,1 >  /mnt/lustre/home/cusanovich/500HT/eQTLs/master.PC' + str(pcs) + '.imputed.150kb.bonferroni.gccor.covcor.regressPCs.gemma.chosen.txt'
+masterer = 'cat /mnt/lustre/home/cusanovich/500HT/ByChr/*.PC' + str(pcs) + '.imputed.1Mb.bonferroni.gccor.newcovcor.regressPCs.gemma.eqtls.txt | sort -k1,1 -k2,2 > /mnt/lustre/home/cusanovich/500HT/eQTLs/master.PC' + str(pcs) + '.imputed.1Mb.bonferroni.gccor.newcovcor.regressPCs.gemma.eqtls.txt; cat /mnt/lustre/home/cusanovich/500HT/ByChr/*.PC' + str(pcs) + '.imputed.1Mb.bonferroni.gccor.newcovcor.regressPCs.gemma.chosen.txt | sort -k1,1 >  /mnt/lustre/home/cusanovich/500HT/eQTLs/master.PC' + str(pcs) + '.imputed.1Mb.bonferroni.gccor.newcovcor.regressPCs.gemma.chosen.txt'
 ifier(masterer)

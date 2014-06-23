@@ -11,6 +11,7 @@ import random
 from random import shuffle
 from random import uniform
 import gzip
+from DarrenTools import ifier, matrix_reader
 #import time
 
 #if len(sys.argv) != 3:
@@ -28,7 +29,7 @@ genodir = '/mnt/lustre/home/cusanovich/500HT/Imputed1415/'
 os.chdir(genodir)
 hmdir = '/mnt/lustre/home/cusanovich/'
 mapper = '.imputed'
-distance = '150kb'
+distance = '1Mb'
 if bonferroni:
 	correction = 'bonferroni'
 else:
@@ -41,28 +42,12 @@ if gccorrection:
 	gccor = '.gccor'
 
 if covcorrection:
-	covcor = '.covcor'
+	covcor = '.newcovcor'
 
 if regressPCs:
 	regressed = '.regressPCs'
 
 currfiles = genodir + "curr_" + chrm + "_pc" + str(pcs) + "_" + correction
-
-def ifier(commander):
-	ify = subprocess.Popen(commander,shell=True)
-	ify.wait()
-
-def matrix_reader(matrix_file,sep="\t",dtype='|S20'):
-	linecounter = subprocess.Popen('wc -l ' + matrix_file, shell=True, stdout=subprocess.PIPE)
-	linecount = int(linecounter.communicate()[0].strip().split()[0])
-	columncounter = subprocess.Popen('awk -F"' + sep + '" \'{print NF;exit}\' ' + matrix_file, shell=True, stdout=subprocess.PIPE)
-	columncount = int(columncounter.communicate()[0].strip().split()[0])
-	raws = numpy.zeros((linecount,columncount),dtype=dtype)
-	rawin = open(matrix_file,'r')
-	for i,line in enumerate(rawin):
-		raws[i,:] = line.strip().split()
-	rawin.close()
-	return raws
 
 def permer(gene):
 	winnerperms = 0

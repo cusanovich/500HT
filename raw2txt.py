@@ -3,35 +3,33 @@ import sys
 import subprocess
 sys.path.append('/mnt/lustre/home/cusanovich/Programs/')
 sys.path.append('/mnt/lustre/home/cusanovich/Programs/lib/python2.6/site-packages/')
+from DarrenTools import ifier, matrix_reader
 import numpy
-
-def ifier(commander):
-	ify = subprocess.Popen(commander,shell=True)
-	ify.wait()
 
 chrm = str(sys.argv[1])
 genodir = sys.argv[2]
 
-genor = genodir + 'ByChr/hutt.imputed.chr' + chrm + '.genos.txt'
-anoter = genodir + 'ByChr/hutt.imputed.chr' + chrm + '.annot.txt'
+genor = genodir + 'ByChr/hutt.all.imputed.chr' + chrm + '.genos.txt'
+anoter = genodir + 'ByChr/hutt.all.imputed.chr' + chrm + '.annot.txt'
 
 print "Loading annotations..."
 sys.stdout.flush()
-bim = open(genodir + 'ByChr/hutt.imputed.chr' + chrm + '.bim','r')
+bim = open(genodir + 'ByChr/hutt.all.imputed.chr' + chrm + '.bim','r')
 bimer = bim.readlines()
 snpids = [x.strip().split()[1] for x in bimer]
 snppos = [x.strip().split()[3] for x in bimer]
 
 print "Loading genotypes..."
 sys.stdout.flush()
-linecounter = subprocess.Popen('wc -l ' + genodir + 'ByChr/hutt.imputed.chr' + chrm + '.raw', shell=True, stdout=subprocess.PIPE)
-linecount = int(linecounter.communicate()[0].strip().split()[0])
-columncounter = subprocess.Popen('awk -F" " \'{print NF;exit}\' ' + genodir + 'ByChr/hutt.imputed.chr' + chrm + '.raw', shell=True, stdout=subprocess.PIPE)
-columncount = int(columncounter.communicate()[0].strip().split()[0])
-raws = numpy.zeros((linecount,columncount),dtype='|S2')
-rawin = open(genodir + 'ByChr/hutt.imputed.chr' + chrm + '.raw','r')
-for i,line in enumerate(rawin):
-	raws[i,:] = line.strip().split()
+raws = matrix_reader(genodir + 'ByChr/hutt.all.imputed.chr' + chrm + '.raw',sep=" ")
+#linecounter = subprocess.Popen('wc -l ' + genodir + 'ByChr/hutt.imputed.chr' + chrm + '.raw', shell=True, stdout=subprocess.PIPE)
+#linecount = int(linecounter.communicate()[0].strip().split()[0])
+#columncounter = subprocess.Popen('awk -F" " \'{print NF;exit}\' ' + genodir + 'ByChr/hutt.imputed.chr' + chrm + '.raw', shell=True, stdout=subprocess.PIPE)
+#columncount = int(columncounter.communicate()[0].strip().split()[0])
+#raws = numpy.zeros((linecount,columncount),dtype='|S2')
+#rawin = open(genodir + 'ByChr/hutt.imputed.chr' + chrm + '.raw','r')
+#for i,line in enumerate(rawin):
+#	raws[i,:] = line.strip().split()
 
 #raws = numpy.loadtxt(genodir + 'ByChr/hutt.imputed.chr' + chrm + '.raw',dtype='str')
 
@@ -58,7 +56,7 @@ numpy.savetxt(anoter,traws5,delimiter="\t",fmt='%s')
 
 print "Finalizing files..."
 sys.stdout.flush()
-paster = '/bin/bash -c "paste <(cat ' + anoter + ') <(cat ' + genor + ') > ' + genodir + 'ByChr/hutt.imputed.chr' + chrm + '.txt; rm ' + anoter + '; rm ' + genor + '"'
+paster = '/bin/bash -c "paste <(cat ' + anoter + ') <(cat ' + genor + ') > ' + genodir + 'ByChr/hutt.all.imputed.chr' + chrm + '.txt; rm ' + anoter + '; rm ' + genor + '"'
 ifier(paster)
 
 doner = open(genodir + 'ByChr/chr' + chrm + '.done','w')

@@ -9,77 +9,43 @@ import subprocess
 import numpy
 import random
 from random import shuffle
-from random import uniform
-import gzip
 from DarrenTools import ifier, matrix_reader
 #import time
 
 phenofile = 'absneutroCombSNP.ph-cvt'
+blocknum = '00'
 #phenofile = sys.argv[1]
+#blocknum = sys.argv[2]
 pheno = phenofile.split('.')[0]
 genodir = '/mnt/lustre/home/cusanovich/500HT/Imputed1415/'
-os.chdir(genodir)
+os.chdir(genodir + 'perms/')
 hmdir = '/mnt/lustre/home/cusanovich/'
 
-currfiles = genodir + "curr_" + pheno
+currfiles = genodir + "perms/Block_" + blocknum + "_curr_" + pheno
 
 # This is the bit about running permutations
-def permer(scores=currscores, circuit=currperms, permwins=currpermwins, actives=curractive):
-	for perm in xrange(0,10000):
-		if actives.count(0) == 0:
-			continue
+def permer(perm,randind):
 		# First we permute the genotypes and write them out to a file (bimbam format)
+		random.seed(perm + (int(blocknum)*100))
 		shuffle(randind)
-		updateind = [0,1,2] + randind
-		permbimbam = open(genodir + 'perm_curr.bimbam','w')
-		for snp in masterdic[gene]:
-			tabixer = Tabixfile('/mnt/lustre/home/cusanovich/500HT/Imputed1415/ByChr/hutt' + mapper + '.' + chrm + '.txt.gz')
-			genos = [x.split('\t') for x in tabixer.fetch(chrm,int(snpdic[snp][1]),int(snpdic[snp][2]))][0]
-			tabixer.close()
-			y = [genos[3], 'A', 'G'] + genos[6:len(genos)]
-			yrand = y[updateind]
-			print >> permbimbam, ", ".join(yrand)
-		permbimbam.close()
+		snper = currfiles + '.snps'
+		aer = currfiles + '.as'
+		ger = currfiles + '.gs'
+		shuffler = 'zcat ' + genodir + 'ByChr/*.all*.gz | grep -f ' + snper + ' - | cut -f' + ','.join(randind) + ' > ' + currfiles + '_perm_sub.bimbam; paste ' + snper + ' ' + aer + ' ' + ger + ' ' + currfiles + '_perm_sub.bimbam > ' + currfiles + '_perm.bimbam'
+		ifier(shuffler)
 		# This runs gemma on the permuted genotypes
-		gemmer = (hmdir + 'Programs/gemma0.94 -g ' + genodir + 'perm_curr.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.covs.txt' + ' -lmm 4 -maf 0.05 -o perm_curr')
+		gemmer = (hmdir + 'Programs/gemma0.94 -g ' + currfiles + '_perm.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.covariates.txt' + ' -lmm 4 -maf 0.05 -o ' + blocknum + '.' + pheno)
 		ifier(gemmer)
-		permresults = matrix_reader(genodir + 'output/perm_curr.assoc.txt',dtype='f8')
-		permsort = permresults[permresults[:,12].argsort()]
-		permwins = permsort[0:100,]
-		permscores = [0]*len(dhsdic[dhsdic.keys()[0]])
-		for snp in permwins[:,1]:
-			permscores = permscores + dhsdic[snp]
-		# For eQTLs I was picking the smallest cis p-val, we should change this to run the enrichment scripts and then count winners for each tissue
-		for z in xrange(len(permscores)):
-			if actives[z] == 1:
-				continue
-			if permscores[z] > scores[z]:
-				permwins[z] += 1
-				circuit[z] += 1
-				if permwins[z] == 10:
-					actives[z] = 1
-	ps = [0]*len(scores)
-	for a in xrange(len(permscores)):
-		if circuit[a] < 10000:
-			ps[a] = 11/uniform(circuit[a]+2,circuit[a]+3)
-		else:
-			ps[a] = (permwins[a] + 1)/float(circuit[a])
-	return ps
 
 print "Loading data..."
-overlaps = open(genodir + 'hutt.imputed.dnase.bed','r')
+overlaps = open(genodir + 'hutt.imputed.dnase2.bed','r')
 #dnasetable = DarrenTools.matrix_reader(genodir + 'hutt.imputed.dnase.bed')
 masterdic = {}
-dhsdic = {}
 for line in overlaps:
 	liner = line.strip().split()
 	if liner[4:].count('0') == len(liner[4:]):
 		continue
 	masterdic[liner[3]] = liner[0:3]
-	if liner[3] == 'rsID':
-		dhsdic[liner[3]] = liner[4:]
-	else:
-		dhsdic[liner[3]] = [int(x) for x in liner[4:]]
 
 overlaps.close()
 exclfile = open(hmdir + '500HT/qqnorm.500ht.gccor.newcovcor.findivs.txt','r')
@@ -87,9 +53,6 @@ exclusions = exclfile.readlines()
 exclusions = [x.strip('\n') for x in exclusions]
 exclfile.close()
 #Just copies covariance matrix so parallel processes don't all have to hit the same file over and over
-
-#cover = ('cp ' + hmdir + '500HT/addSNP.500ht.ordered.square.txt ' + currfiles + '.square.txt')
-#ifier(cover)
 
 #Copy phenotype file to curr directory
 officialfindivs = []
@@ -127,9 +90,7 @@ covs.close()
 numpy.savetxt(currfiles + '.square.txt', covmat, fmt = '%s', delimiter = '\t', newline = '\n')
 
 #Set up list for permutations
-randind = range(3,len(officialfindivs) + 3)
 
-#t0 = time.time()
 ####Pull genotypes for the SNPs in cis, if genotypes not already in dictionary: go to geno file and pull in appropriate data
 print "Writing out genotypes..."
 genofinfile = open(genodir + 'hutt.imputed.rename.fam','r')
@@ -140,50 +101,31 @@ for line in genofinfile:
 genofinfile.close()
 
 genoinds = [genofins.index(x) + 6 for x in officialfindivs]
-genos = {}
-currbimbam = open(currfiles + '.bimbam','w')
-#t0 = time.time()
+
+snplist = open(currfiles + '.snps','w')
+alist = open(currfiles + '.as','w')
+glist = open(currfiles + '.gs','w')
 for snp in masterdic.keys():
 #for snp in masterdic.keys()[0:1000]:
-	chrm = masterdic[snp][0]
-	if chrm == 'chrm':
-		continue
-	tabixer = Tabixfile('/mnt/lustre/home/cusanovich/500HT/Imputed1415/ByChr/hutt.all.imputed.' + chrm + '.txt.gz')
-	tempgenos = [x.split('\t') for x in tabixer.fetch(chrm,int(masterdic[snp][1])-1,int(masterdic[snp][2]))][0]
-	genos[snp] = [tempgenos[x] for x in range(0,6) + genoinds]
-	tabixer.close()
-	y = [genos[snp][3], 'A', 'G'] + genos[snp][6:]
-	print >> currbimbam, ", ".join(y)
+	print >> snplist, snp
+	print >> alist, 'A'
+	print >> glist, 'G'
 
-#t1 = time.time()
-#print t1-t0
-currbimbam.close()
-
-#genomat = matrix_reader(genodir + 'hutt.imputed.dhssnps.bimbam',sep=",")
-print "Running GEMMA..."
-gemmer = (hmdir + 'Programs/gemma0.94 -g ' + currfiles + '.bimbam -p ' + currfiles + '.pheno -k ' + currfiles + '.square.txt -c ' + currfiles + '.covariates -lmm 4 -maf 0.05 -o curr_' + pheno)
-t0 = time.time()
-ifier(gemmer)
-t1 = time.time()
-print t1-t0
-#currresults = open(genodir + 'output/curr_' + pheno + '.assoc.txt','r')
-currresults = matrix_reader(genodir + 'output/curr_' + pheno + '.assoc.txt',dtype='f8')
-currsort = curresults[currresults[:,12].argsort()]
-currwins = currsort[0:100,]
-currscores = [0]*len(dhsdic[dhsdic.keys()[0]])
-for snp in currwins[:,1]:
-	currscores = currscores + dhsdic[snp]
-currperms = [0]*len(dhsdic[dhsdic.keys()[0]])
-currpermwins = [0]*len(dhsdic[dhsdic.keys()[0]])
-curractive = [0]*len(dhsdic[dhsdic.keys()[0]])
+snplist.close()
+alist.close()
+glist.close()
 
 print "Running permutations..."
-tissueps = permer(scores = currscores, circuit = currperms, permwins = currpermwins, actives=curractive)
-#completedgenes += 1
+blocker = open(genodir + 'Block_' + blocknum + 'permwins.txt','w')
+for perm in xrange(0,100):
+	permer(perm,randind = genoinds)
+	permresults = matrix_reader(genodir + 'output/perm_curr_' + blocknum + '.assoc.txt',dtype='f8')
+	permsort = permresults[permresults[:,12].argsort()]
+	permwins = permsort[0:100,]
+	print >> blocker, '\t'.join(permwins)
 
-#t1 = time.time()
-#print t1-t0
-
+blocker.close()
+ 
 cleanup = 'rm ' + genodir + '*curr_' + pheno + '.*'
 ifier(cleanup)
 

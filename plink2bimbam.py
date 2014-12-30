@@ -7,10 +7,10 @@ from DarrenTools import ifier, matrix_reader
 genodir = '/mnt/lustre/home/cusanovich/500HT/Imputed1415/'
 os.chdir(genodir)
 
-plinker = 'plink --bfile 500HT/Imputed1415/hutt.imputed.rename --recodeA'
-ifier(plinker)
+#plinker = 'plink --bfile 500HT/Imputed1415/hutt.imputed.rename --recodeA'
+#ifier(plinker)
 
-genomatix = matrix_reader('/mnt/lustre/home/cusanovich/plink.raw',sep=" ")
+genomatix = matrix_reader('/mnt/lustre/home/cusanovich/500HT/Imputed1415/hutt.imputed.rename.add.raw',sep=" ")
 properg = genomatix.T[6:,1:]
 snps = [x.split('_')[0] for x in genomatix.T[6:,0]]
 findivs = genomatix.T[1,1:]

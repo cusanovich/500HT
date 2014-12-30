@@ -9,7 +9,7 @@ sys.path.append('/mnt/lustre/home/cusanovich/Programs/lib/python2.6/site-package
 from myfuncs import ifier
 
 i = sys.argv[1]
-linecounter = subprocess.Popen('wc -l /mnt/lustre/home/cusanovich/500HT/Exprs/qqnorm.500ht.gccor.covcor.3chip_order.chr' + str(i) + '.genes', shell=True, stdout=subprocess.PIPE)
+linecounter = subprocess.Popen('wc -l /mnt/lustre/home/cusanovich/500HT/Exprs/qqnorm.500ht.gccor.newcovcor.ordered.chr' + str(i) + '.genes', shell=True, stdout=subprocess.PIPE)
 linecount = int(linecounter.communicate()[0].strip().split()[0])
 blocks = linecount/100
 for j in range(blocks):
@@ -27,16 +27,16 @@ cleanup = "rm /mnt/lustre/home/cusanovich/500HT/ByChr/chr" + str(i) + ".*.done"
 ifier(cleanup)
 
 masterer = ('cat /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) +
-	'.*.trans.pvals.txt > /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) +
-	'.trans.pvals.txt; cat /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) +
+	'.*.newcovcor.trans.pvals.txt > /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) +
+	'.newcovcor.trans.pvals.txt; cat /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) +
 	'.*.trans.sig.txt >  /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) +
 	'.trans.sig.txt; cat /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) +
-	'.*.sherlock.txt >  /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) +
-	'.sherlock.txt')
+	'.*.newcovcor.sherlock.txt >  /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) +
+	'.newcovcor.sherlock.txt')
 ifier(masterer)
 
 cleanup = 'rm /mnt/lustre/home/cusanovich/500HT/Imputed1415/chr' + i + '.fam; rm /mnt/lustre/home/cusanovich/500HT/Imputed1415/chr' + i + '.bed; rm /mnt/lustre/home/cusanovich/500HT/Imputed1415/chr' + i + '.bim; rm /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + i + '.block*'
 ifier(cleanup)
 
-zipper = 'gzip /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) + '.trans.pvals.txt'
+zipper = 'gzip /mnt/lustre/home/cusanovich/500HT/ByChr/chr' + str(i) + '.newcovcor.trans.pvals.txt'
 ifier(zipper)

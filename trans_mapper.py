@@ -18,7 +18,7 @@ stop = sys.argv[3]
 #Number of genes * Number of SNPs less any cis associations
 bonthresh = 14014*393613.0
 
-genes = matrix_reader('../Exprs/qqnorm.500ht.gccor.covcor.3chip_order.chr' + chrm + '.genes')
+genes = matrix_reader('../Exprs/qqnorm.500ht.gccor.newcovcor.ordered.chr' + chrm + '.genes')
 tssdic = {}
 tss = open('../ensemblCAGETSS_RNAseq_sorted.bed','r')
 for line in tss:
@@ -27,7 +27,7 @@ for line in tss:
 
 if start == '0':
 	oldfam = matrix_reader(genodir + 'hutt.imputed.500ht.fam',sep=" ")
-	exprs = matrix_reader('../Exprs/qqnorm.500ht.gccor.covcor.3chip_order.chr' + chrm + '.bimbam',sep=" ")
+	exprs = matrix_reader('../Exprs/qqnorm.500ht.gccor.newcovcor.ordered.chr' + chrm + '.bimbam',sep=" ")
 	newfam = np.column_stack((oldfam[:,0:5],exprs))
 	np.savetxt('./chr' + chrm + '.fam',newfam,delimiter=" ",fmt='%s')
 	copier = 'cp ./hutt.imputed.500ht.bed ./chr' + chrm + '.bed; cp ./hutt.imputed.500ht.bim ./chr' + chrm + '.bim'
@@ -38,9 +38,9 @@ else:
 starter = str(int(start)/100)
 if len(starter) == 1:
 	starter = '0' + starter
-pfile = open('../ByChr/chr' + chrm + '.block' + starter + '.trans.pvals.txt','w')
+pfile = open('../ByChr/chr' + chrm + '.block' + starter + '.newcovcor.trans.pvals.txt','w')
 #sigfile = open('../ByChr/chr' + chrm + '.block' + starter + '.trans.sig.txt','w')
-sherlockfile = open('../ByChr/chr' + chrm + '.block' + starter + '.sherlock.txt','w')
+sherlockfile = open('../ByChr/chr' + chrm + '.block' + starter + '.newcovcor.sherlock.txt','w')
 for gene in range(int(start),int(stop)):
 #for gene in range(2):
 	gemmer = ('~/Programs/gemma0.94 -bfile ./chr' + chrm + ' -km 2 -k ../addSNP.500ht.txt -lmm 2 -n ' + str(gene + 1) + ' -maf 0.05 -o chr' + chrm + '.block' + starter)

@@ -49,8 +49,8 @@ for tf in genelist:
 	except IOError:
 		pass
 
-expressed = matrix_reader('/mnt/lustre/home/cusanovich/500HT/qqnorm.500ht.gccor.covcor.ordered.bimbam',dtype='float')
-genes = open('/mnt/lustre/home/cusanovich/500HT/genenames.500ht.txt','r').readlines()
+expressed = matrix_reader('/mnt/lustre/home/cusanovich/500HT/qqnorm.500ht.gccor.newcovcor.ordered.bimbam',dtype='float')
+genes = open('/mnt/lustre/home/cusanovich/500HT/qqnorm.500ht.gccor.newcovcor.genenames.txt','r').readlines()
 genes = [x.strip() for x in genes]
 genedic = {}
 for g,k in enumerate(genes):
@@ -80,7 +80,7 @@ pccounter = 0
 for pc in range(pcs):
 	print str(pc) + ' PCs are being removed from the expression data...'
 	sys.stdout.flush()
-	pcmat = matrix_reader('/mnt/lustre/home/cusanovich/500HT/Exprs/qqnorm.500ht.gccor.covcor.ordered.pc' + str(pc),dtype='float')
+	pcmat = matrix_reader('/mnt/lustre/home/cusanovich/500HT/Exprs/qqnorm.500ht.gccor.newcovcor.ordered.pc' + str(pc),dtype='float')
 	Y = expressed.T
 	if pc == 0:
 		Yfit = Y
@@ -128,11 +128,11 @@ for pc in range(pcs):
 	sys.stdout.flush()
 	pccounter += 1
 
-#outfile = open('/mnt/lustre/home/cusanovich/500HT/trans_maximizer.txt','w')
-#for z in range(len(totalcor)):
-#	print >> outfile, str(totalcor[z]) + '\t' + str(totalps[z]) + '\t' + str(totalrandcor[z]) + '\t' + str(totalrandps[z])
+outfile = open('/mnt/lustre/home/cusanovich/500HT/trans_newcovcor_maximizer.txt','w')
+for z in range(len(totalcor)):
+	print >> outfile, str(totalcor[z]) + '\t' + str(totalps[z]) + '\t' + str(totalrandcor[z]) + '\t' + str(totalrandps[z])
 
-#outfile.close()
+outfile.close()
 
 print max(totalcor)
 print totalcor.index(max(totalcor))

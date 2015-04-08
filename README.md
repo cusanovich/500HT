@@ -43,7 +43,7 @@ This genotype data can then be converted into a set of tabix-indexed files (sepa
 I could not find a way to affect the order of individuals in the plink files, so I reordered everything else to match the plink files. I would recommend that others generate the genotype files first, then reorder the expression matrix according to this file, then generate the PC matrix and covariance matrix.  
    - See expr_reorg.R
 
-eQTL Pipeline
+__cis__-eQTL Pipeline
 -------------
 ###1. column_grabber.py
 

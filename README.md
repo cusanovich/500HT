@@ -30,7 +30,7 @@ This genotype data can then be converted into a set of tabix-indexed files (sepa
     - time
     - glob
     - sys
-    - DarrenTools (ifier and matrix_reader)
+    - DarrenTools (defines 'ifier' and 'matrix_reader' functions)
     - numpy (for raw2txt.py)
 
     Hardcoded:
@@ -40,7 +40,7 @@ This genotype data can then be converted into a set of tabix-indexed files (sepa
 
     Note: must be able to submit jobs from node.
 
-I could not find a way to affect the order of infividuals in the plink files, so I reordered everything else to match the plink files. I would recommend that others generate the genotype files first, then reorder the expression matrix according to this file, then generate the PC matrix and covariance matrix.  
+I could not find a way to affect the order of individuals in the plink files, so I reordered everything else to match the plink files. I would recommend that others generate the genotype files first, then reorder the expression matrix according to this file, then generate the PC matrix and covariance matrix.  
    - See expr_reorg.R
 
 eQTL Pipeline
@@ -74,7 +74,7 @@ eQTL Pipeline
     Result:
     Calls eqtl_driver.py separately for each number of PCs we wish to regress out.
 
-###3. eqtl_driver.py (called directly by #2 directly)
+###3. eqtl_driver.py (called directly from #2)
 
     Usage: python eqtl_driver.py [No. of PCs] (typically called from within multi_pc_eqtl_driver.sh)
 
@@ -111,12 +111,12 @@ eQTL Pipeline
     - Line 20: True/False whether to look for GC content corrected expression matrix
     - Line 21: True/False whether to look for covariate corrected expression matrix
     - Line 22: True/False whether to use Bonferroni correction for number of SNPs tested for each gene (alternative is permutations - Slow!!!)
-    - Line 23: True/False whether to regres out PCs before GEMMA or include them as a covariate
+    - Line 23: True/False whether to regress out PCs before GEMMA or include them as a covariate
     - Line 28: Directory where genotype files are
     - Line 30: Home directory (just used to shorten some of the code in the file)
     - Lines 31-50: Naming conventions for keeping track of True/False toggles above in output file name
     - Lines 63 and 65: part of permutation function requires some hardcoded locations
-    - Lines 78 and 81: location of master indext table from #1
+    - Lines 78 and 81: location of master index table from #1
     - Line 97: location of .bed format file listing SNP locations
     - Line 102: hmdir + location of square additive covariance matrix for relatedness, and where a current copy can be made
     - Line 106: hmdir + location of .bimbam format gene expression matrix
@@ -132,7 +132,7 @@ eQTL Pipeline
     - Line 191, 193 and 194: test used (I am using the LRT results, Column 12 of GEMMA output)
     - Line 213: location to combine all results for current chromosome to (reports all P-values for all SNP/Gene pairs)
     - Line 219: location to combine bonferroni-corrected lead SNP/gene pairs to
-    - Line 225: location to write out marker file when finished (this must match up with where the #3 is monitoring)
+    - Line 225: location to write out '.done' file when finished (this must match up with where #3 is monitoring)
 
     Results:
     For each gene on the current chromosome, will run GEMMA against all SNPs specified and collect results into two files:

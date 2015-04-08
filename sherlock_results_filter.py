@@ -1,5 +1,6 @@
 import os
-indir = '/mnt/lustre/home/cusanovich/500HT/MinalSherlock/'
+#indir = '/mnt/lustre/home/cusanovich/500HT/MinalSherlock/'
+indir = '/mnt/lustre/home/cusanovich/ForMinal/'
 infiles = os.listdir(indir)
 for infilename in infiles:
 	if 'results.txt' not in infilename:

@@ -1,5 +1,5 @@
-infile = open("/mnt/lustre/home/cusanovich/500HT/eQTLs/master.newcovcor.sherlock.txt","r")
-outfile = open("/mnt/lustre/home/cusanovich/500HT/eQTLs/master.newcovcor.sherlock.filter.txt","w")
+infile = open("/mnt/lustre/home/cusanovich/500HT/eQTLs/remaster.imputed.1Mb.bonferroni.gccor.newcovcor.sherlock.txt","r")
+outfile = open("/mnt/lustre/home/cusanovich/500HT/eQTLs/remaster.imputed.1Mb.bonferroni.gccor.newcovcor.sherlock.filter.txt","w")
 for line in infile:
 	liner = line.strip().split()
 	if liner[3] == '0' and float(liner[2]) < 1.0e-05:

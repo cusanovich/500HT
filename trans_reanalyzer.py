@@ -27,7 +27,7 @@ files = os.listdir(qtldir)
 files = [x for x in files if 'trans.pvals' in x]
 #chrm = '22'
 #Number of genes * Number of SNPs less any cis associations
-bonthresh = 14014*393613.0
+#bonthresh = 14014*393613.0
 
 rsfile = open('/mnt/lustre/home/cusanovich/500HT/Imputed1415/trans.rsids.txt','r')
 rsnos = [x.strip().split()[0] for x in rsfile.readlines()]
@@ -52,7 +52,7 @@ winners = []
 winningps = []
 winningbonf = []
 genes = []
-sherlockfile = open('../eQTLs/remaster.sherlock.txt','w')
+sherlockfile = open('../eQTLs/remaster.imputed.1Mb.bonferroni.gccor.newcovcor.sherlock.txt','w')
 for chrm in files:
 	currchrm = gzip.open(chrm)
 	for line in currchrm:
@@ -92,7 +92,7 @@ for chrm in files:
 sherlockfile.close()
 print "Writing cislike file..."
 sys.stdout.flush()
-cislike = open('../eQTLs/trans.cislike.pvals.txt','w')
+cislike = open('../eQTLs/master.imputed.1Mb.bonferroni.gccor.newcovcor.trans.cislike.pvals.txt','w')
 for counter,gene in enumerate(genes):
 	newestline = [gene, winners[counter], str(winningps[counter]), str(winningbonf[counter])]
 	print >> cislike, '\t'.join(newestline)
@@ -104,7 +104,7 @@ print "Bonferroni threshold is " + str(1/bonthresh)
 print "Writing trans file..."
 genecount = 0
 sys.stdout.flush()
-transers = open('../eQTLs/trans.sig.pvals.txt','w')
+transers = open('../eQTLs/master.imputed.1Mb.bonferroni.gccor.newcovcor.trans.sig.pvals.txt','w')
 for chrmagain in files:
 	currchrm = gzip.open(chrmagain)
 	chrmed = chrmagain.split('.')[0]
@@ -120,7 +120,7 @@ for chrmagain in files:
 				tester = float(snp)
 				if tester < 1/bonthresh:
 					snpinfo = snpdic[rsnos[counter]]
-					if snpinfo[0] == chrmed and abs(int(snpinfo[1]) - int(tssdic[liner[0]])) < 5000000:
+					if snpinfo[0] == chrmed and abs(int(snpinfo[1]) - int(tssdic[liner[0]])) < 1000000:
 						continue
 					print >> transers, rsnos[(counter + 1)] + '\t' + snpinfo[0] + ':' + snpinfo[1] + '\t' + liner[0] + '\t' + chrmed + ':' + tssdic[liner[0]] + '\t' + snp
 			except ValueError:

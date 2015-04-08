@@ -4,3 +4,4 @@ nohup.out
 *.pdf
 *.txt
 *.bimbam
+*.pyc

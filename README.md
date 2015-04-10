@@ -21,7 +21,7 @@ Preparing expression and genotype files
 ```shell
 plink --bile hutt.imputed.rename --keep [ID File] --bfile --out hutt.imputed.newsubset
 ```
-The "ID File" has a column of "HUTTERITES" (repeated) and column of individual IDs.
+The [ID File] has a column of "HUTTERITES" (repeated) and column of individual IDs.
 
 This genotype data can then be converted into a set of tabix-indexed files (separate files for each chromosome) with cis/plink_bed2tabix.py.
 
@@ -54,13 +54,15 @@ _cis_-eQTL Pipeline
 
 **Usage:** `python column_grabber.py`
 
-    Hardcoded lines:
-    - Line 5: location of plink format .bim file for genotypes
-    - Line 19: names of genes from expression matrix in same order as expression matrix
-    - Line 31: for each chromosome (1-22),  names of genes by chromosome-specific files (again order should match chrom-specific expression matrices)
-    - Line 39: name of master index table to write out to
-    - Line 40: name of master index table if genes are broken out by chromosome
-    - Line 43: file listing gene/snp overlaps (column 1 = gene name, column 2 = snpID). I used bedtools and cut to generate this.
+```
+Hardcoded lines:
+- Line 5: location of plink format .bim file for genotypes
+- Line 19: names of genes from expression matrix in same order as expression matrix
+- Line 31: for each chromosome (1-22),  names of genes by chromosome-specific files (again order should match chrom-specific expression matrices)
+- Line 39: name of master index table to write out to
+- Line 40: name of master index table if genes are broken out by chromosome
+- Line 43: file listing gene/snp overlaps (column 1 = gene name, column 2 = snpID). I used bedtools and cut to generate this.
+```
 
 **Note:**
 Generating the gene/SNP overlap file can be accomplished in a few short steps:  
@@ -81,10 +83,12 @@ Master index table that lists Gene Name, SNP ID, row from expression matrix of g
 
 **Usage:** `bash multi_pc_eqtl_driver.sh`
 
-    Hardcoded lines:
-    - Line 2: # of PCs to regress out
-        e.g. 'for i in $(seq 61 1 100)' with seq [start] [step] [stop]
-    - Line 4: location of eqtl_driver.py script
+```
+Hardcoded lines:
+- Line 2: # of PCs to regress out
+    e.g. 'for i in $(seq 61 1 100)' with seq [start] [step] [stop]
+- Line 4: location of eqtl_driver.py script
+```
 
 **Note:**
 Must be called from a node that can submit qsub jobs
@@ -102,11 +106,13 @@ Calls eqtl_driver.py separately for each number of PCs we wish to regress out.
    - time
    - sys
 
-    Hardcoded lines:
-    - Line 19: location of alt_gemma_noplink_eqtl_mapper.py (actual mapper script)
-    - Line 19: stdout and stderr file locations (e.g. '~/dump/')
-    - Lines 22-25: Files to monitor for a finished chromosomal eqtl mapping (e.g. '/mnt/lustre/home/cusanovich/500HT/ByChr/*.PC' + str(pcs) + '.bonferroni.done')
-    - Line 28: Location of output files (e.g. '/mnt/lustre/home/cusanovich/500HT/ByChr/*.PC' + str(pcs) + '.imputed.1Mb.bonferroni.gccor.newcovcor.regressPCs.gemma.eqtls.txt' and '/mnt/lustre/home/cusanovich/500HT/eQTLs/master.PC' + str(pcs) + '.imputed.1Mb.bonferroni.gccor.newcovcor.regressPCs.gemma.chosen.txt')
+```
+Hardcoded lines:
+- Line 19: location of alt_gemma_noplink_eqtl_mapper.py (actual mapper script)
+- Line 19: stdout and stderr file locations (e.g. '~/dump/')
+- Lines 22-25: Files to monitor for a finished chromosomal eqtl mapping (e.g. '/mnt/lustre/home/cusanovich/500HT/ByChr/*.PC' + str(pcs) + '.bonferroni.done')
+- Line 28: Location of output files (e.g. '/mnt/lustre/home/cusanovich/500HT/ByChr/*.PC' + str(pcs) + '.imputed.1Mb.bonferroni.gccor.newcovcor.regressPCs.gemma.eqtls.txt' and '/mnt/lustre/home/cusanovich/500HT/eQTLs/master.PC' + str(pcs) + '.imputed.1Mb.bonferroni.gccor.newcovcor.regressPCs.gemma.chosen.txt')
+```
 
 **Results:**
 For each chromosome, submits the eQTL mapper job, monitors the outdir for completion of mapping, then concatenates all the chrom files into a master file for the eQTL mapping with the current number of PCs regressed out.
@@ -125,32 +131,34 @@ For each chromosome, submits the eQTL mapper job, monitors the outdir for comple
    - gzip
    - DarrenTools (defines 'ifier' and 'matrix_reader' functions)
 
-    Hardcoded lines:
-    - Line 20: True/False whether to look for GC content corrected expression matrix
-    - Line 21: True/False whether to look for covariate corrected expression matrix
-    - Line 22: True/False whether to use Bonferroni correction for number of SNPs tested for each gene (alternative is permutations - Slow!!!)
-    - Line 23: True/False whether to regress out PCs before GEMMA or include them as a covariate
-    - Line 28: Directory where genotype files are
-    - Line 30: Home directory (just used to shorten some of the code in the file)
-    - Lines 31-50: Naming conventions for keeping track of True/False toggles above in output file name
-    - Lines 63 and 65: part of permutation function requires some hardcoded locations
-    - Lines 78 and 81: location of master index table from #1
-    - Line 97: location of .bed format file listing SNP locations
-    - Line 102: hmdir + location of square additive covariance matrix for relatedness, and where a current copy can be made
-    - Line 106: hmdir + location of .bimbam format gene expression matrix
-    - Line 107: hmdir + location of PC values for regressing out PCs
-    - Line 110: hmdir + location of PC values if supplying them to GEMMA
-    - Line 151: For each gene, where to write out current expression values for GEMMA
-    - Lines 153-155: hmdir + locations to write out expression data if supplying PCs to GEMMA as covariate
-    - Line 165: location of Tabix-indexed genotypes
-    - Line 171: location where to write out current genotypes
-    - Line 176: hmdir + location of GEMMA program, current genotypes, current expression values, current copy of relatedness, non-default arguments to GEMMA (which tests to run, MAF)
-    - Line 179: same as above except for when passing PCs to GEMMA as covariate
-    - Line 181: location where GEMMA results are written out ('output' directory within directory specified in Line 28)
-    - Line 191, 193 and 194: test used (I am using the LRT results, Column 12 of GEMMA output)
-    - Line 213: location to combine all results for current chromosome to (reports all P-values for all SNP/Gene pairs)
-    - Line 219: location to combine bonferroni-corrected lead SNP/gene pairs to
-    - Line 225: location to write out '.done' file when finished (this must match up with where #3 is monitoring)
+```
+Hardcoded lines:
+- Line 20: True/False whether to look for GC content corrected expression matrix
+- Line 21: True/False whether to look for covariate corrected expression matrix
+- Line 22: True/False whether to use Bonferroni correction for number of SNPs tested for each gene (alternative is permutations - Slow!!!)
+- Line 23: True/False whether to regress out PCs before GEMMA or include them as a covariate
+- Line 28: Directory where genotype files are
+- Line 30: Home directory (just used to shorten some of the code in the file)
+- Lines 31-50: Naming conventions for keeping track of True/False toggles above in output file name
+- Lines 63 and 65: part of permutation function requires some hardcoded locations
+- Lines 78 and 81: location of master index table from #1
+- Line 97: location of .bed format file listing SNP locations
+- Line 102: hmdir + location of square additive covariance matrix for relatedness, and where a current copy can be made
+- Line 106: hmdir + location of .bimbam format gene expression matrix
+- Line 107: hmdir + location of PC values for regressing out PCs
+- Line 110: hmdir + location of PC values if supplying them to GEMMA
+- Line 151: For each gene, where to write out current expression values for GEMMA
+- Lines 153-155: hmdir + locations to write out expression data if supplying PCs to GEMMA as covariate
+- Line 165: location of Tabix-indexed genotypes
+- Line 171: location where to write out current genotypes
+- Line 176: hmdir + location of GEMMA program, current genotypes, current expression values, current copy of relatedness, non-default arguments to GEMMA (which tests to run, MAF)
+- Line 179: same as above except for when passing PCs to GEMMA as covariate
+- Line 181: location where GEMMA results are written out ('output' directory within directory specified in Line 28)
+- Line 191, 193 and 194: test used (I am using the LRT results, Column 12 of GEMMA output)
+- Line 213: location to combine all results for current chromosome to (reports all P-values for all SNP/Gene pairs)
+- Line 219: location to combine bonferroni-corrected lead SNP/gene pairs to
+- Line 225: location to write out '.done' file when finished (this must match up with where #3 is monitoring)
+```
 
 **Results:**
 For each gene on the current chromosome, will run GEMMA against all SNPs specified and collect results into two files:

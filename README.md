@@ -28,12 +28,12 @@ This genotype data can then be converted into a set of tabix-indexed files (sepa
 **Usage:** `python plink_bed2tabix.py`
 
 **Necessary python modules:**
-    - subprocess
-    - time
-    - glob
-    - sys
-    - DarrenTools (defines 'ifier' and 'matrix_reader' functions)
-    - numpy (for raw2txt.py)
+   - subprocess
+   - time
+   - glob
+   - sys
+   - DarrenTools (defines 'ifier' and 'matrix_reader' functions)
+   - numpy (for raw2txt.py)
 
     Hardcoded lines:
     - Line 20: directory containing genotype files. Script expects a 'ByChr/' directory to be present within the genotype directory.
@@ -61,13 +61,13 @@ _cis_-eQTL Pipeline
     - Line 43: file listing gene/snp overlaps (column 1 = gene name, column 2 = snpID). I used bedtools and cut to generate this.
 
 **Note:**
-Generating the gene/SNP overlap file can be accomplished in a few short steps:
-1. A .bed file of transcription start sites needs to defined (chr start stop geneID). Defining the TSS is actually not a trivial task and requires careful consideration of the study design, so I will leave that to you to decide.
-2. A .bed file of SNP coordinates can be created based on the .bim file with the following command:  
+Generating the gene/SNP overlap file can be accomplished in a few short steps:  
+Step 1: A .bed file of transcription start sites needs to defined (chr start stop geneID). Defining the TSS is actually not a trivial task and requires careful consideration of the study design, so I will leave that to you to decide.  
+Step 2: A .bed file of SNP coordinates can be created based on the .bim file with the following command:  
 ```shell
 awk -v OFS='\t' '{ print "chr"$1, $4-1, $4, $2}' [input .bim file] > [output .bed file]
 ```
-3. After you pick a window to define as the _cis_ test region, you can generate the overlap file with bedtools:  
+Step 3: After you pick a window to define as the _cis_ test region, you can generate the overlap file with bedtools:  
 ```shell
 /mnt/lustre/home/cusanovich/Programs/BEDTools/bin/windowBed -w [cis region size in bp] -a [TSS .bed file] -b [SNP .bed file] | cut -f4,8 > [gene/SNP overlap file]
 ```
@@ -95,10 +95,10 @@ Calls eqtl_driver.py separately for each number of PCs we wish to regress out.
 **Usage:** `python eqtl_driver.py [No. of PCs] (typically called from within multi_pc_eqtl_driver.sh)`
 
 **Necessary python modules:**
-    - subprocess
-    - glob
-    - time
-    - sys
+   - subprocess
+   - glob
+   - time
+   - sys
 
     Hardcoded lines:
     - Line 19: location of alt_gemma_noplink_eqtl_mapper.py (actual mapper script)
@@ -114,14 +114,14 @@ For each chromosome, submits the eQTL mapper job, monitors the outdir for comple
 **Usage:** `python alt_gemma_noplink_eqtl_mapper.py [Chromosome ID (e.g. 'chr1')] [No. PCs to regress out]`
 
 **Necessary python modules:**
-    - os
-    - sys
-    - pysam
-    - subprocess
-    - numpy
-    - random
-    - gzip
-    - DarrenTools (defines 'ifier' and 'matrix_reader' functions)
+   - os
+   - sys
+   - pysam
+   - subprocess
+   - numpy
+   - random
+   - gzip
+   - DarrenTools (defines 'ifier' and 'matrix_reader' functions)
 
     Hardcoded lines:
     - Line 20: True/False whether to look for GC content corrected expression matrix
@@ -152,8 +152,8 @@ For each chromosome, submits the eQTL mapper job, monitors the outdir for comple
 
 **Results:**
 For each gene on the current chromosome, will run GEMMA against all SNPs specified and collect results into two files:
-    - '.gemma.eqtls.txt' file gives p-values for all SNP/gene pairs
-    - '.gemma.chosen.txt' file gives original and bonferroni-corrected p-values for lead SNP/gene pairs, where lead SNP means the SNP with the smallest p-value observed for each gene
+   - '.gemma.eqtls.txt' file gives p-values for all SNP/gene pairs
+   - '.gemma.chosen.txt' file gives original and bonferroni-corrected p-values for lead SNP/gene pairs, where lead SNP means the SNP with the smallest p-value observed for each gene
 
 
 Other scripts that may be of interest:

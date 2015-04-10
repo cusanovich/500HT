@@ -47,7 +47,7 @@ __cis__-eQTL Pipeline
 -------------
 ###1. cis/column_grabber.py
 
-    Usage: python column_grabber.py
+**Usage**: `python column_grabber.py`
 
     Hardcoded files:
     - Line 5: location of plink format .bim file for genotypes
@@ -57,13 +57,17 @@ __cis__-eQTL Pipeline
     - Line 40: name of master index table if genes are broken out by chromosome
     - Line 43: file listing gene/snp overlaps (column 1 = gene name, column 2 = snpID). I used bedtools and cut to generate this.
 
-    Note:
-    Generating the gene/SNP overlap file can be accomplished in a few short steps:
-    i. A .bed file of transcription start sites needs to defined (chr start stop geneID). Defining the TSS is actually not a trivial task and requires careful consideration of the study design, so I will leave that to you to decide.
-    ii. A .bed file of SNP coordinates can be created based on the .bim file with the following command:
-    `awk -v OFS='\t' '{ print "chr"$1, $4-1, $4, $2}' [input .bim file] > [output .bed file]`
-    iii. After you pick a window to define as the __cis__ test region, you can generate the overlap file with bedtools:
-    `/mnt/lustre/home/cusanovich/Programs/BEDTools/bin/windowBed -w [cis region size in bp] -a [TSS .bed file] -b [SNP .bed file] | cut -f4,8 > [gene/SNP overlap file]`
+**Note**:
+Generating the gene/SNP overlap file can be accomplished in a few short steps:
+  1. A .bed file of transcription start sites needs to defined (chr start stop geneID). Defining the TSS is actually not a trivial task and requires careful consideration of the study design, so I will leave that to you to decide.
+  2. A .bed file of SNP coordinates can be created based on the .bim file with the following command:  
+```shell
+awk -v OFS='\t' '{ print "chr"$1, $4-1, $4, $2}' [input .bim file] > [output .bed file]
+```
+  3. After you pick a window to define as the __cis__ test region, you can generate the overlap file with bedtools:  
+```shell
+/mnt/lustre/home/cusanovich/Programs/BEDTools/bin/windowBed -w [cis region size in bp] -a [TSS .bed file] -b [SNP .bed file] | cut -f4,8 > [gene/SNP overlap file]
+```
 
     Result:
     Master index table that lists Gene Name, SNP ID, row from expression matrix of gene (0-based), row of SNP from .bim (0-based), chromosome ID (e.g. 'chr1')

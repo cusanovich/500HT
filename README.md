@@ -21,19 +21,19 @@ Preparing expression and genotype files
 ```shell
 plink --bile hutt.imputed.rename --keep [ID File] --bfile --out hutt.imputed.newsubset
 ```
-The ID File has a column of "HUTTERITES" (repeated) and column of individual IDs in the desired order.
+The "ID File" has a column of "HUTTERITES" (repeated) and column of individual IDs.
 
 This genotype data can then be converted into a set of tabix-indexed files (separate files for each chromosome) with cis/plink_bed2tabix.py.
 
 **Usage:** `python plink_bed2tabix.py`
 
 **Necessary python modules:**
-   - subprocess
-   - time
-   - glob
-   - sys
-   - DarrenTools (defines 'ifier' and 'matrix_reader' functions)
-   - numpy (for raw2txt.py)
+- subprocess
+- time
+- glob
+- sys
+- DarrenTools (defines 'ifier' and 'matrix_reader' functions)
+- numpy (for raw2txt.py)
 
     Hardcoded lines:
     - Line 20: directory containing genotype files. Script expects a 'ByChr/' directory to be present within the genotype directory.

@@ -35,11 +35,12 @@ This genotype data can then be converted into a set of tabix-indexed files (sepa
 - DarrenTools (defines 'ifier' and 'matrix_reader' functions)
 - numpy (for raw2txt.py)
 
-
+```
     Hardcoded lines:
     - Line 20: directory containing genotype files. Script expects a 'ByChr/' directory to be present within the genotype directory.
     - Line 21: name of output files (currently set to 'hutt.all.imputed'
     - Line 36: location of raw2txt.py script
+```
 
 **Note:**
 Must be able to submit jobs from node.

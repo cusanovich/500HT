@@ -18,14 +18,16 @@ Preparing expression and genotype files
 
 **Genotypes** of choice need to to be in plink .bed format. This can be extracted from the master plink files with this command:
 
-    plink --bile hutt.imputed.rename --keep [ID File] --bfile --out hutt.imputed.newsubset
-    The ID File has a column of "HUTTERITES" (repeated) and column of individual IDs in the desired order.
+```shell
+plink --bile hutt.imputed.rename --keep [ID File] --bfile --out hutt.imputed.newsubset
+```
+The ID File has a column of "HUTTERITES" (repeated) and column of individual IDs in the desired order.
 
 This genotype data can then be converted into a set of tabix-indexed files (separate files for each chromosome) with cis/plink_bed2tabix.py.
 
-    Usage: python plink_bed2tabix.py
+**Usage:** `python plink_bed2tabix.py`
 
-    Necessary python modules:
+**Necessary python modules:**
     - subprocess
     - time
     - glob
@@ -33,23 +35,24 @@ This genotype data can then be converted into a set of tabix-indexed files (sepa
     - DarrenTools (defines 'ifier' and 'matrix_reader' functions)
     - numpy (for raw2txt.py)
 
-    Hardcoded:
+    Hardcoded lines:
     - Line 20: directory containing genotype files. Script expects a 'ByChr/' directory to be present within the genotype directory.
     - Line 21: name of output files (currently set to 'hutt.all.imputed'
     - Line 36: location of raw2txt.py script
 
-    Note: must be able to submit jobs from node.
+**Note:**
+Must be able to submit jobs from node.
 
 I could not find a way to affect the order of individuals in the plink files, so I reordered everything else to match the plink files. I would recommend that others generate the genotype files first, then reorder the expression matrix according to this file, then generate the PC matrix and covariance matrix.  
    - See cis/expr_reorg.R
 
-__cis__-eQTL Pipeline
+_cis_-eQTL Pipeline
 -------------
 ###1. cis/column_grabber.py
 
-**Usage**: `python column_grabber.py`
+**Usage:** `python column_grabber.py`
 
-    Hardcoded files:
+    Hardcoded lines:
     - Line 5: location of plink format .bim file for genotypes
     - Line 19: names of genes from expression matrix in same order as expression matrix
     - Line 31: for each chromosome (1-22),  names of genes by chromosome-specific files (again order should match chrom-specific expression matrices)
@@ -57,69 +60,70 @@ __cis__-eQTL Pipeline
     - Line 40: name of master index table if genes are broken out by chromosome
     - Line 43: file listing gene/snp overlaps (column 1 = gene name, column 2 = snpID). I used bedtools and cut to generate this.
 
-**Note**:
+**Note:**
 Generating the gene/SNP overlap file can be accomplished in a few short steps:
-  1. A .bed file of transcription start sites needs to defined (chr start stop geneID). Defining the TSS is actually not a trivial task and requires careful consideration of the study design, so I will leave that to you to decide.
-  2. A .bed file of SNP coordinates can be created based on the .bim file with the following command:  
+1. A .bed file of transcription start sites needs to defined (chr start stop geneID). Defining the TSS is actually not a trivial task and requires careful consideration of the study design, so I will leave that to you to decide.
+2. A .bed file of SNP coordinates can be created based on the .bim file with the following command:  
 ```shell
 awk -v OFS='\t' '{ print "chr"$1, $4-1, $4, $2}' [input .bim file] > [output .bed file]
 ```
-  3. After you pick a window to define as the __cis__ test region, you can generate the overlap file with bedtools:  
+3. After you pick a window to define as the _cis_ test region, you can generate the overlap file with bedtools:  
 ```shell
 /mnt/lustre/home/cusanovich/Programs/BEDTools/bin/windowBed -w [cis region size in bp] -a [TSS .bed file] -b [SNP .bed file] | cut -f4,8 > [gene/SNP overlap file]
 ```
 
-    Result:
-    Master index table that lists Gene Name, SNP ID, row from expression matrix of gene (0-based), row of SNP from .bim (0-based), chromosome ID (e.g. 'chr1')
+**Result:**
+Master index table that lists Gene Name, SNP ID, row from expression matrix of gene (0-based), row of SNP from .bim (0-based), chromosome ID (e.g. 'chr1')
 
 ###2. cis/multi_pc_eqtl_driver.sh
 
-    Usage: bash multi_pc_eqtl_driver.sh
+**Usage:** `bash multi_pc_eqtl_driver.sh`
 
-    Hardcoded:
+    Hardcoded lines:
     - Line 2: # of PCs to regress out
         e.g. 'for i in $(seq 61 1 100)' with seq [start] [step] [stop]
     - Line 4: location of eqtl_driver.py script
 
-    Note: must be called from a node that can submit qsub jobs
+**Note:**
+Must be called from a node that can submit qsub jobs
 
-    Result:
-    Calls eqtl_driver.py separately for each number of PCs we wish to regress out.
+**Result:**
+Calls eqtl_driver.py separately for each number of PCs we wish to regress out.
 
 ###3. cis/eqtl_driver.py (called directly from #2)
 
-    Usage: python eqtl_driver.py [No. of PCs] (typically called from within multi_pc_eqtl_driver.sh)
+**Usage:** `python eqtl_driver.py [No. of PCs] (typically called from within multi_pc_eqtl_driver.sh)`
 
-    Necessary python modules:
-    subprocess
-    glob
-    time
-    sys
+**Necessary python modules:**
+    - subprocess
+    - glob
+    - time
+    - sys
 
-    Hardcoded:
+    Hardcoded lines:
     - Line 19: location of alt_gemma_noplink_eqtl_mapper.py (actual mapper script)
     - Line 19: stdout and stderr file locations (e.g. '~/dump/')
     - Lines 22-25: Files to monitor for a finished chromosomal eqtl mapping (e.g. '/mnt/lustre/home/cusanovich/500HT/ByChr/*.PC' + str(pcs) + '.bonferroni.done')
     - Line 28: Location of output files (e.g. '/mnt/lustre/home/cusanovich/500HT/ByChr/*.PC' + str(pcs) + '.imputed.1Mb.bonferroni.gccor.newcovcor.regressPCs.gemma.eqtls.txt' and '/mnt/lustre/home/cusanovich/500HT/eQTLs/master.PC' + str(pcs) + '.imputed.1Mb.bonferroni.gccor.newcovcor.regressPCs.gemma.chosen.txt')
 
-    Results:
-    For each chromosome, submits the eQTL mapper job, monitors the outdir for completion of mapping, then concatenates all the chrom files into a master file for the eQTL mapping with the current number of PCs regressed out.
+**Results:**
+For each chromosome, submits the eQTL mapper job, monitors the outdir for completion of mapping, then concatenates all the chrom files into a master file for the eQTL mapping with the current number of PCs regressed out.
 
 ###4. cis/alt_gemma_noplink_eqtl_mapper.py (called directly from #3)
 
-    Usage: python alt_gemma_noplink_eqtl_mapper.py [Chromosome ID (e.g. 'chr1')] [No. PCs to regress out]
+**Usage:** `python alt_gemma_noplink_eqtl_mapper.py [Chromosome ID (e.g. 'chr1')] [No. PCs to regress out]`
 
-    Necessary python modules:
-    os
-    sys
-    pysam
-    subprocess
-    numpy
-    random
-    gzip
-    DarrenTools (defines 'ifier' and 'matrix_reader' functions)
+**Necessary python modules:**
+    - os
+    - sys
+    - pysam
+    - subprocess
+    - numpy
+    - random
+    - gzip
+    - DarrenTools (defines 'ifier' and 'matrix_reader' functions)
 
-    Hardcoded:
+    Hardcoded lines:
     - Line 20: True/False whether to look for GC content corrected expression matrix
     - Line 21: True/False whether to look for covariate corrected expression matrix
     - Line 22: True/False whether to use Bonferroni correction for number of SNPs tested for each gene (alternative is permutations - Slow!!!)
@@ -146,8 +150,8 @@ awk -v OFS='\t' '{ print "chr"$1, $4-1, $4, $2}' [input .bim file] > [output .be
     - Line 219: location to combine bonferroni-corrected lead SNP/gene pairs to
     - Line 225: location to write out '.done' file when finished (this must match up with where #3 is monitoring)
 
-    Results:
-    For each gene on the current chromosome, will run GEMMA against all SNPs specified and collect results into two files:
+**Results:**
+For each gene on the current chromosome, will run GEMMA against all SNPs specified and collect results into two files:
     - '.gemma.eqtls.txt' file gives p-values for all SNP/gene pairs
     - '.gemma.chosen.txt' file gives original and bonferroni-corrected p-values for lead SNP/gene pairs, where lead SNP means the SNP with the smallest p-value observed for each gene
 

@@ -66,7 +66,9 @@ Hardcoded lines:
 
 **Note:**
 Generating the gene/SNP overlap file can be accomplished in a few short steps:  
+
 Step 1: A .bed file of transcription start sites needs to defined (chr start stop geneID). Defining the TSS is actually not a trivial task and requires careful consideration of the study design, so I will leave that to you to decide.  
+
 Step 2: A .bed file of SNP coordinates can be created based on the .bim file with the following command:  
 ```shell
 awk -v OFS='\t' '{ print "chr"$1, $4-1, $4, $2}' [input .bim file] > [output .bed file]
